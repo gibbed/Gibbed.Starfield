@@ -29,7 +29,7 @@ namespace Gibbed.Starfield.PluginFormats
         GRUP = 0x50555247u, // 2
         GMST = 0x54534D47u, // 3
         KYWD = 0x4457594Bu, // 4   BGSKeyword
-        FFKW = 0x574B4646u, // 5   BGSKeyword BGSFormFolderKeywordList
+        FFKW = 0x574B4646u, // 5   BGSFormFolderKeywordList
         LCRT = 0x5452434Cu, // 6   BGSLocationRefType
         AACT = 0x54434141u, // 7   BGSAction
         TRNS = 0x534E5254u, // 8   BGSTransform
@@ -155,7 +155,7 @@ namespace Gibbed.Starfield.PluginFormats
         SMEN = 0x4E454D53u, // 128 BGSStoryManagerEventNode
         DLBR = 0x52424C44u, // 129 BGSDialogueBranch
         MUST = 0x5453554Du, // 130 BGSMusicTrackFormWrapper
-        DLVW = 0x57564C44u, // 131 !!
+        DLVW = 0x57564C44u, // 131
         WOOP = 0x504F4F57u, // 132 TESWordOfPower
         SHOU = 0x554F4853u, // 133 TESShout
         EQUP = 0x50555145u, // 134 BGSEquipSlot
@@ -164,7 +164,7 @@ namespace Gibbed.Starfield.PluginFormats
         ASTP = 0x50545341u, // 137 BGSAssociationType
         OTFT = 0x5446544Fu, // 138 BGSOutfit
         ARTO = 0x4F545241u, // 139 BGSArtObject
-        MATO = 0x4F54414Du, // 140 !!
+        MATO = 0x4F54414Du, // 140
         MOVT = 0x54564F4Du, // 141 BGSMovementType
         DUAL = 0x4C415544u, // 142 BGSDualCastData
         COLL = 0x4C4C4F43u, // 143 BGSCollisionLayer
@@ -174,13 +174,13 @@ namespace Gibbed.Starfield.PluginFormats
         AMDL = 0x4C444D41u, // 147 BGSAimModel
         AAMD = 0x444D4141u, // 148 BGSAimAssistModel
         MAAM = 0x4D41414Du, // 149 BGSMeleeAimAssistModel
-        LAYR = 0x5259414Cu, // 150 !!
+        LAYR = 0x5259414Cu, // 150 !! Creation Kit only?
         COBJ = 0x4A424F43u, // 151 BGSConstructibleObject
         OMOD = 0x444F4D4Fu, // 152 BGSMod::Attachment::Mod
         ZOOM = 0x4D4F4F5Au, // 153 BGSAimDownSightModel
         INNR = 0x524E4E49u, // 154 BGSInstanceNamingRules
         KSSM = 0x4D53534Bu, // 155 BGSSoundKeywordMapping
-        SCCO = 0x4F434353u, // 156 !!
+        SCCO = 0x4F434353u, // 156
         AORU = 0x55524F41u, // 157 BGSAttractionRule
         STAG = 0x47415453u, // 158 BGSSoundTagSet
         IRES = 0x53455249u, // 159 BGSResource
@@ -204,7 +204,7 @@ namespace Gibbed.Starfield.PluginFormats
         AAPD = 0x44504141u, // 177 BGSAimAssistPoseData
         VOLI = 0x494C4F56u, // 178 BGSVolumetricLighting
         SFBK = 0x4B424653u, // 179 BGSSurface::Block
-        SFPC = 0x43504653u, // 180 !!
+        SFPC = 0x43504653u, // 180 !! Creation Kit only?
         SFPT = 0x54504653u, // 181 BGSSurface::Pattern
         SFTR = 0x52544653u, // 182 BGSSurface::Tree
         PCMT = 0x544D4350u, // 183 BGSPlanetContentManagerTree
