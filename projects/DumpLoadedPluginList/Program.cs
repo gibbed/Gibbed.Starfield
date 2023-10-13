@@ -71,6 +71,11 @@ namespace DumpLoadedPluginList
             }
 
             Dump(runtime, addressLibrary);
+
+            if (System.Diagnostics.Debugger.IsAttached == false)
+            {
+                Console.ReadLine();
+            }
         }
 
         private static void Dump(RuntimeProcess runtime, AddressLibrary addressLibrary)
