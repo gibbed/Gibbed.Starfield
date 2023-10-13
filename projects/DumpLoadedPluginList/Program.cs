@@ -33,11 +33,20 @@ namespace DumpLoadedPluginList
     {
         public static void Main(string[] args)
         {
+            Environment.ExitCode = RealMain(args);
+            if (System.Diagnostics.Debugger.IsAttached == false)
+            {
+                Console.ReadLine();
+            }
+        }
+
+        private static int RealMain(string[] args)
+        {
             var process = DumpingHelpers.FindSuitableProcess();
             if (process == null)
             {
                 Console.WriteLine("Failed to find suitable Starfield process.");
-                return;
+                return -1;
             }
 
             var isSteamVersion = process.Modules
@@ -54,28 +63,24 @@ namespace DumpLoadedPluginList
             {
                 Console.WriteLine("Exception when fetching address library for Starfield:");
                 Console.WriteLine(e);
-                return;
+                return -2;
             }
 
             if (addressLibrary == null)
             {
                 Console.WriteLine("Failed to load address library for Starfield.");
-                return;
+                return -3;
             }
 
             using RuntimeProcess runtime = new();
             if (runtime.OpenProcess(process) == false)
             {
                 Console.WriteLine("Failed to open Starfield process.");
-                return;
+                return -4;
             }
 
             Dump(runtime, addressLibrary);
-
-            if (System.Diagnostics.Debugger.IsAttached == false)
-            {
-                Console.ReadLine();
-            }
+            return 0;
         }
 
         private static bool IsSteamModule(string name)
