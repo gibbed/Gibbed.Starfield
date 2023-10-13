@@ -42,7 +42,7 @@ namespace DumpLoadedPluginList
 
             var isSteamVersion = process.Modules
                 .Cast<System.Diagnostics.ProcessModule>()
-                .Any(m => m.ModuleName == "steam_api64");
+                .Any(m => IsSteamModule(m.ModuleName) == true);
             var isMsStoreVersion = isSteamVersion == false;
 
             AddressLibrary addressLibrary;
@@ -76,6 +76,11 @@ namespace DumpLoadedPluginList
             {
                 Console.ReadLine();
             }
+        }
+
+        private static bool IsSteamModule(string name)
+        {
+            return name.StartsWith("steam_api64", StringComparison.OrdinalIgnoreCase) == true;
         }
 
         private static void Dump(RuntimeProcess runtime, AddressLibrary addressLibrary)
