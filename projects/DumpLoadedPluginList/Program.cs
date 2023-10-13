@@ -118,7 +118,7 @@ namespace DumpLoadedPluginList
                 var id = runtime.ReadValueU8(pluginPointer + 0x208);
                 var lightId = runtime.ReadValueU16(pluginPointer + 0x20A);
 
-                var masterList = ReadPointerList(runtime, pluginPointer + 0x1D0);
+                var masterFullList = ReadPointerList(runtime, pluginPointer + 0x1D0);
                 var masterNormalList = ReadPointerList(runtime, pluginPointer + 0x1E0);
                 var masterLightList = ReadPointerList(runtime, pluginPointer + 0x1F0);
 
@@ -129,7 +129,7 @@ namespace DumpLoadedPluginList
                     Flags = flags,
                     Id = id,
                     LightId = lightId,
-                    MasterFullList = masterList,
+                    MasterFullList = masterFullList,
                     MasterNormalList = masterNormalList,
                     MasterLightList = masterLightList,
                 };
@@ -162,14 +162,17 @@ namespace DumpLoadedPluginList
             Console.WriteLine("# PLUGINS");
             foreach (var pluginInfo in pluginInfos)
             {
-                if ((pluginInfo.Flags & 4) == 0)
+                string idString = "", loadedMarker = "";
+                if ((pluginInfo.Flags & 4) != 0)
                 {
-                    Console.WriteLine($"      {pluginInfo.FileName}");
+                    idString = pluginInfo.IdString;
+                    loadedMarker = "*";
                 }
-                else
-                {
-                    Console.WriteLine($"{pluginInfo.IdString,5} *{pluginInfo.FileName}");
-                }
+
+                Console.Write($"{idString,5} ");
+                Console.Write($"{loadedMarker}{pluginInfo.FileName}");
+                //Console.Write($" {pluginInfo.Flags:X}");
+                Console.WriteLine();
             }
             Console.WriteLine();
 
