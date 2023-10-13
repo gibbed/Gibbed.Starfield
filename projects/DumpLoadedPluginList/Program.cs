@@ -159,17 +159,17 @@ namespace DumpLoadedPluginList
                 }
             }
 
-            Console.WriteLine("# UNLOADED PLUGINS");
-            foreach (var pluginInfo in pluginInfos.Where(pi => (pi.Flags & 4) == 0))
+            Console.WriteLine("# PLUGINS");
+            foreach (var pluginInfo in pluginInfos)
             {
-                Console.WriteLine($"      {pluginInfo.FileName}");
-            }
-            Console.WriteLine();
-
-            Console.WriteLine("# LOADED PLUGINS");
-            foreach (var pluginInfo in pluginInfos.Where(pi => (pi.Flags & 4) != 0))
-            {
-                Console.WriteLine($"{pluginInfo.IdString,5} {pluginInfo.FileName}");
+                if ((pluginInfo.Flags & 4) == 0)
+                {
+                    Console.WriteLine($"      {pluginInfo.FileName}");
+                }
+                else
+                {
+                    Console.WriteLine($"{pluginInfo.IdString,5} *{pluginInfo.FileName}");
+                }
             }
             Console.WriteLine();
 
