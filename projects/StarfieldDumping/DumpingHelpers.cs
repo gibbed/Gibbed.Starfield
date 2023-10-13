@@ -20,6 +20,7 @@
  *    distribution.
  */
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -29,12 +30,7 @@ namespace StarfieldDumping
     {
         public static Process FindSuitableProcess()
         {
-            var processNames = new[]
-            {
-                "Starfield",
-                "Starfield.noaslr",
-            };
-            foreach (var processName in processNames)
+            foreach (var processName in GetProcessNames())
             {
                 var process = Process.GetProcessesByName(processName).FirstOrDefault();
                 if (process != null)
@@ -43,6 +39,16 @@ namespace StarfieldDumping
                 }
             }
             return null;
+        }
+
+        private static IEnumerable<string> GetProcessNames()
+        {
+            yield return "Starfield";
+            yield return "Starfield.noaslr";
+            yield return "Starfield.noaslr.1.7.36.0";
+            yield return "Starfield.noaslr.1.7.33.0";
+            yield return "Starfield.noaslr.1.7.29.0";
+            yield return "Starfield.noaslr.1.7.23.0";
         }
     }
 }
