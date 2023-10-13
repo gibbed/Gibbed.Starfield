@@ -19,7 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Gibbed.AddressLibrary\Gibbed.AddressLibrary.csproj" />
     <ProjectReference Include="..\Gibbed.IO\Gibbed.IO.csproj" />
-    <ProjectReference Include="..\NDesk.Options\NDesk.Options.csproj" />
     <ProjectReference Include="..\StarfieldDumping\StarfieldDumping.csproj" />
   </ItemGroup>
 </Project>
