@@ -99,6 +99,11 @@ namespace DumpLoadedPluginList
 
             var dataHandlerPointerPointer = Id2Pointer(825890);
             var dataHandlerPointer = runtime.ReadPointer(dataHandlerPointerPointer);
+            if (dataHandlerPointer == null)
+            {
+                Console.WriteLine("Starfield data handler is not yet initialized.");
+                return;
+            }
 
             List<IntPtr> pluginPointers = new();
             var pluginListEntryPointer = dataHandlerPointer + 0x14F0;
