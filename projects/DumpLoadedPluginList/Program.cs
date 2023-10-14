@@ -122,7 +122,7 @@ namespace DumpLoadedPluginList
             Dictionary<IntPtr, PluginInfo> pluginInfoMap = new();
             foreach (var pluginPointer in pluginPointers)
             {
-                var fileName = runtime.ReadString(pluginPointer + 0x038, 260, Encoding.UTF8);
+                var fileName = runtime.ReadString(pluginPointer + 0x038, 260, Encoding.Default);
                 var flags = runtime.ReadValueU32(pluginPointer + 0x1B8);
 
                 var id = runtime.ReadValueU8(pluginPointer + 0x208);
@@ -205,7 +205,7 @@ namespace DumpLoadedPluginList
                     pluginNodeQueue.Push((child, depth + 1));
                 }
             }
-            Console.WriteLine();
+            //Console.WriteLine();
         }
 
         private static IntPtr[] ReadPointerList(RuntimeProcess runtime, IntPtr listPointer)
