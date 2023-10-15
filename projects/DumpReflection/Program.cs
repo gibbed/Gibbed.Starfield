@@ -54,7 +54,7 @@ namespace DumpReflection
             var enumTypes = ReadEnumTypes(runtime, Id2Pointer);
 
             Dictionary<IntPtr, string> typeNames = new();
-            foreach (var (typeId, typeName) in GetTypeNames())
+            foreach (var (typeId, typeName) in TypeNames.Get())
             {
                 typeNames[Id2Pointer(typeId)] = typeName;
             }
