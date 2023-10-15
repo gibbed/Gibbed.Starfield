@@ -20,16 +20,12 @@
  *    distribution.
  */
 
-namespace DumpReflection
+namespace DumpReflection.Reflection
 {
-    internal class EnumMember
+    internal class UniquePointerType : ReferenceType
     {
-        public string Name;
-        public long Value;
-
-        public override string ToString()
+        public UniquePointerType() : base(Natives.TypeId.UniquePointer)
         {
-            return $"{this.Name ?? base.ToString()} = {this.Value}";
         }
     }
 }

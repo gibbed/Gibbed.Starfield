@@ -20,17 +20,16 @@
  *    distribution.
  */
 
-using System;
-using System.Runtime.InteropServices;
-
-namespace DumpReflection.Natives
+namespace DumpReflection.Reflection
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal class EnumType
+    internal class EnumMember
     {
-        public BaseType Base; // 00
-        public IntPtr Next; // 10
-        public IntPtr Name; // 18
-        public StdVector Members; // 20
+        public string Name { get; set; }
+        public long Value { get; set; }
+
+        public override string ToString()
+        {
+            return $"{this.Name ?? base.ToString()} = {this.Value}";
+        }
     }
 }

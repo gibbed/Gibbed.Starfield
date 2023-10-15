@@ -21,16 +21,19 @@
  */
 
 using System;
-using System.Runtime.InteropServices;
 
-namespace DumpReflection.Natives
+namespace DumpReflection.Reflection
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal class EnumType
+    internal class ClassField
     {
-        public BaseType Base; // 00
-        public IntPtr Next; // 10
-        public IntPtr Name; // 18
-        public StdVector Members; // 20
+        public string Name { get; set; }
+        public IntPtr TypePointer { get; set; }
+        public IType Type { get; set; }
+        public long Offset { get; set; }
+
+        public override string ToString()
+        {
+            return $"{this.Name} : {this.Type.Name} @{this.Offset:X}";
+        }
     }
 }

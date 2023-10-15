@@ -20,27 +20,12 @@
  *    distribution.
  */
 
-using System;
-using System.Collections.Generic;
-
-namespace DumpReflection
+namespace DumpReflection.Reflection
 {
-    internal class ClassType
+    internal class BorrowedPointerType : ReferenceType
     {
-        public IntPtr Pointer;
-        public string Name;
-        public uint Size;
-        public ushort Alignment;
-        public readonly List<ClassField> Fields;
-
-        public ClassType()
+        public BorrowedPointerType() : base(Natives.TypeId.BorrowedPointer)
         {
-            this.Fields = new();
-        }
-
-        public override string ToString()
-        {
-            return $"{this.Name ?? base.ToString()} {this.Size} {this.Alignment}";
         }
     }
 }

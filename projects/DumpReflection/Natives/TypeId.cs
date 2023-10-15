@@ -20,17 +20,19 @@
  *    distribution.
  */
 
-using System;
-using System.Runtime.InteropServices;
-
 namespace DumpReflection.Natives
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal class EnumType
+    internal enum TypeId : byte
     {
-        public BaseType Base; // 00
-        public IntPtr Next; // 10
-        public IntPtr Name; // 18
-        public StdVector Members; // 20
+        Basic = 0, // BSReflection::BasicType
+        String = 1, // BSReflection::IStringType
+        Enumeration = 2, // BSReflection::EnumerationType
+        Class = 3, // BSReflection::ClassType
+        List = 4, // BSReflection::IListType
+        Set = 5, // BSReflection::ISetType
+        Map = 6, // BSReflection::IMapType
+        UniquePointer = 7, // BSReflection::IUniquePtrType
+        SharedPointer = 8, // BSReflection::ISharedPtrType
+        BorrowedPointer = 9, // BSReflection::IBorrowedPtrType
     }
 }

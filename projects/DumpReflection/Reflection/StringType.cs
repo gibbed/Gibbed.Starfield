@@ -21,16 +21,26 @@
  */
 
 using System;
-using System.Runtime.InteropServices;
+using StarfieldDumping;
 
-namespace DumpReflection.Natives
+namespace DumpReflection.Reflection
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal class EnumType
+    internal class StringType : BaseType<Natives.BaseType>
     {
-        public BaseType Base; // 00
-        public IntPtr Next; // 10
-        public IntPtr Name; // 18
-        public StdVector Members; // 20
+        private string _Name;
+
+        public override string Name => this._Name;
+
+        protected override void Read(RuntimeProcess runtime, IntPtr nativePointer, Natives.BaseType native)
+        {
+            this.Read(nativePointer, native);
+
+            if (this.TypeId != Natives.TypeId.String)
+            {
+                throw new InvalidOperationException();
+            }
+
+            this._Name = Helpers.GetStringFromVftable(runtime, native.Vftable, 4);
+        }
     }
 }

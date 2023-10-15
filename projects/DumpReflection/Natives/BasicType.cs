@@ -21,22 +21,19 @@
  */
 
 using System;
-using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
-namespace DumpReflection
+namespace DumpReflection.Natives
 {
-    internal class EnumType
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct BasicType
     {
-        public IntPtr Pointer;
-        public string Name;
-        public uint Size;
-        public ushort Alignment;
-        public ushort Unknown0E;
-        public readonly List<EnumMember> Members;
-
-        public EnumType()
-        {
-            this.Members = new();
-        }
+        public BaseType Base; // 00
+        public IntPtr Name; // 10
+        public byte Id; // 18
+        public bool IsSigned; // 19
+        public byte Unknown1A; // 1A
+        public byte Unknown1B; // 1B
+        public uint Unknown1C; // 1C
     }
 }

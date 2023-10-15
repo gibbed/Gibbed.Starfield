@@ -28,7 +28,7 @@ namespace DumpReflection.Natives
     [StructLayout(LayoutKind.Sequential)]
     internal struct EnumMember
     {
-        public IntPtr Name;
-        public long Value;
+        public IntPtr Name; // 00
+        public long Value; // 08
     }
 }

@@ -21,16 +21,12 @@
  */
 
 using System;
-using System.Runtime.InteropServices;
 
 namespace DumpReflection.Natives
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal class EnumType
+    [Flags]
+    internal enum TypeFlags : byte
     {
-        public BaseType Base; // 00
-        public IntPtr Next; // 10
-        public IntPtr Name; // 18
-        public StdVector Members; // 20
+        None = 0,
     }
 }

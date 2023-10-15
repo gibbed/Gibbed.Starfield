@@ -21,13 +21,23 @@
  */
 
 using System;
+using System.Collections.Generic;
+using StarfieldDumping;
 
-namespace DumpReflection
+namespace DumpReflection.Reflection
 {
-    internal class ClassField
+    internal interface IType
     {
-        public string Name;
-        public IntPtr Type;
-        public uint Offset;
+        public IntPtr NativePointer { get; }
+        public IntPtr VftablePointer { get; }
+        public uint TypeSize { get; }
+        public ushort TypeAlignment { get; }
+        public Natives.TypeId TypeId { get; }
+        public Natives.TypeFlags TypeFlags { get; }
+        public string Name { get; }
+
+        public void Read(RuntimeProcess runtime, IntPtr nativePointer);
+
+        public void Resolve(Dictionary<IntPtr, IType> typeMap);
     }
 }

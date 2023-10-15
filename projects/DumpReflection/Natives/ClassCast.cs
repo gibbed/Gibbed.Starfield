@@ -26,11 +26,9 @@ using System.Runtime.InteropServices;
 namespace DumpReflection.Natives
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal class EnumType
+    internal struct ClassCast
     {
-        public BaseType Base; // 00
-        public IntPtr Next; // 10
-        public IntPtr Name; // 18
-        public StdVector Members; // 20
+        public IntPtr Type; // 00
+        public long Offset; // 08
     }
 }

@@ -28,25 +28,19 @@ namespace DumpReflection.Natives
     [StructLayout(LayoutKind.Sequential)]
     internal class ClassType
     {
-        public IntPtr Vftable;
-        public uint Size;
-        public ushort Alignment;
-        public byte Unknown0E;
-        public byte Unknown0F;
-        public IntPtr Next;
-        public IntPtr Name;
-        public IntPtr Unknown20;
-        public IntPtr Unknown28;
-        public IntPtr Unknown30;
-        public IntPtr Unknown38;
-        public StdVector Fields;
-        public IntPtr Unknown58;
-        public IntPtr Unknown60;
-        public IntPtr Unknown68;
-        public IntPtr Unknown70;
-        public IntPtr Unknown78;
-        public IntPtr Unknown80;
-        public uint Unknown88;
-        public ushort Unknown8C;
+        public BaseType Base; // 00
+        public IntPtr Next; // 10
+        public IntPtr Name; // 18
+        public IntPtr UnknownCallback20; // 20
+        public IntPtr UnknownCallback28; // 28
+        public IntPtr UnknownCallback30; // 30
+        public IntPtr UnknownCallback38; // 38
+        public StdVector Fields; // 40
+        public IntPtr Unknown58; // 58
+        public IntPtr Unknown60; // 60
+        public IntPtr Unknown68; // 68
+        public StdVector Casts; // 70
+        public uint Unknown88; // 88
+        public ushort Unknown8C; // 8C
     }
 }

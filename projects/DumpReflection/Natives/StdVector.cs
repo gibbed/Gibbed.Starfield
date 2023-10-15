@@ -28,8 +28,8 @@ namespace DumpReflection.Natives
     [StructLayout(LayoutKind.Sequential)]
     internal class StdVector
     {
-        public IntPtr Start;
-        public IntPtr End;
-        public IntPtr Allocated;
+        public IntPtr Start; // 00
+        public IntPtr End; // 08
+        public IntPtr Allocated; // 10
     }
 }

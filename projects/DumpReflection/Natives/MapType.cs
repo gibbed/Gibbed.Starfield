@@ -26,11 +26,9 @@ using System.Runtime.InteropServices;
 namespace DumpReflection.Natives
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal class EnumType
+    internal class MapType
     {
         public BaseType Base; // 00
-        public IntPtr Next; // 10
-        public IntPtr Name; // 18
-        public StdVector Members; // 20
+        public IntPtr Mapped; // 10
     }
 }

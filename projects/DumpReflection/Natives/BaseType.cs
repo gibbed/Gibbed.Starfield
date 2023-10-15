@@ -26,11 +26,12 @@ using System.Runtime.InteropServices;
 namespace DumpReflection.Natives
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal class EnumType
+    internal struct BaseType
     {
-        public BaseType Base; // 00
-        public IntPtr Next; // 10
-        public IntPtr Name; // 18
-        public StdVector Members; // 20
+        public IntPtr Vftable; // 00
+        public uint TypeSize; // 08
+        public ushort TypeAlignment; // 0C
+        public TypeId TypeId; // 0E
+        public TypeFlags TypeFlags; // 0F
     }
 }

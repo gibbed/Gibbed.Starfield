@@ -24,9 +24,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
+using DumpReflection.Reflection;
 using Gibbed.AddressLibrary;
 using StarfieldDumping;
+using TypeId = DumpReflection.Natives.TypeId;
 
 namespace DumpReflection
 {
@@ -50,186 +51,128 @@ namespace DumpReflection
                 return new(mainModuleBaseAddressValue + offset);
             }
 
-            var classTypes = ReadClassTypes(runtime, Id2Pointer);
-            var enumTypes = ReadEnumTypes(runtime, Id2Pointer);
+            BasicType.ExpectedVftablePointer = Id2Pointer(294379);
+            ClassType.ExpectedVftablePointer = Id2Pointer(285167);
+            EnumType.ExpectedVftablePointer = Id2Pointer(292531);
 
-            Dictionary<IntPtr, string> typeNames = new();
-            foreach (var (typeId, typeName) in TypeNames.Get())
+            var baseTypeTypeOffset = Marshal.OffsetOf<Natives.BaseType>(nameof(Natives.BaseType.TypeId)).ToInt32();
+            var classNextOffset = Marshal.OffsetOf<Natives.ClassType>(nameof(Natives.ClassType.Next)).ToInt32();
+            var enumNextOffset = Marshal.OffsetOf<Natives.EnumType>(nameof(Natives.EnumType.Next)).ToInt32();
+
+            Queue<IntPtr> queue = new();
+
+            // class types
+            foreach (var typePointer in ReadTypeList(runtime, Id2Pointer(885835), classNextOffset))
             {
-                typeNames[Id2Pointer(typeId)] = typeName;
+                queue.Enqueue(typePointer);
             }
 
-            Dictionary<IntPtr, ClassType> classTypeMap = new();
-            foreach (var instance in classTypes)
+            // enumeration types
+            foreach (var typePointer in ReadTypeList(runtime, Id2Pointer(885839), enumNextOffset))
             {
-                classTypeMap.Add(instance.Pointer, instance);
+                queue.Enqueue(typePointer);
             }
 
-            Dictionary<IntPtr, EnumType> enumTypeMap = new();
-            foreach (var instance in enumTypes)
+            Dictionary<IntPtr, IType> typeMap = new();
+
+            while (queue.Count > 0)
             {
-                enumTypeMap.Add(instance.Pointer, instance);
+                var nativePointer = queue.Dequeue();
+
+                if (nativePointer == IntPtr.Zero)
+                {
+                    continue;
+                }
+
+                if (typeMap.ContainsKey(nativePointer) == true)
+                {
+                    // already processed
+                    continue;
+                }
+
+                var nativeTypeType = (TypeId)runtime.ReadValueU8(nativePointer + baseTypeTypeOffset);
+
+                IType instance = nativeTypeType switch
+                {
+                    TypeId.Basic => new BasicType(),
+                    TypeId.String => new StringType(),
+                    TypeId.Enumeration => new EnumType(),
+                    TypeId.Class => new ClassType(),
+                    TypeId.List => new ListType(),
+                    TypeId.Set => new SetType(),
+                    TypeId.Map => new MapType(),
+                    TypeId.UniquePointer => new UniquePointerType(),
+                    TypeId.SharedPointer => new SharedPointerType(),
+                    TypeId.BorrowedPointer => new BorrowedPointerType(),
+                    _ => throw new NotSupportedException(),
+                };
+
+                if (instance == null)
+                {
+                    continue;
+                }
+
+                instance.Read(runtime, nativePointer);
+
+                typeMap[nativePointer] = instance;
+
+                if (instance is ClassType classType)
+                {
+                    foreach (var field in classType.Fields)
+                    {
+                        queue.Enqueue(field.TypePointer);
+                    }
+
+                    foreach (var cast in classType.Casts)
+                    {
+                        queue.Enqueue(cast.TypePointer);
+                    }
+                }
+                else if (instance is ReferenceType referenceType)
+                {
+                    queue.Enqueue(referenceType.UnderlyingTypePointer);
+                }
+                else if (instance is CollectionType collectionType)
+                {
+                    queue.Enqueue(collectionType.ItemTypePointer);
+                }
+                else if (instance is MapType mapType)
+                {
+                    queue.Enqueue(mapType.ItemTypePointer);
+                }
             }
 
-            foreach (var instance in classTypes)
+            foreach (var instance in typeMap.Values)
+            {
+                instance.Resolve(typeMap);
+            }
+
+            foreach (var instance in typeMap.Values.OfType<ClassType>())
             {
                 Console.WriteLine($"{instance.Name}");
+
                 foreach (var field in instance.Fields)
                 {
-                    string typeName;
-                    if (classTypeMap.TryGetValue(field.Type, out var classType) == true)
-                    {
-                        typeName = classType.Name;
-                    }
-                    else if (enumTypeMap.TryGetValue(field.Type, out var enumType) == true)
-                    {
-                        typeName = enumType.Name;
-                    }
-                    else if (typeNames.TryGetValue(field.Type, out typeName) == false)
-                    {
-                        typeName = $"unknown:{runtime.ToStaticAddress(field.Type):X}";
-                    }
-
-                    Console.WriteLine($"  {field.Name} : {typeName} @{field.Offset:X}");
+                    Console.WriteLine($"  {field.Name} : {field.Type.Name} @{field.Offset:X}");
                 }
+
                 Console.WriteLine();
             }
 
             return 0;
         }
 
-        private static List<ClassType> ReadClassTypes(RuntimeProcess runtime, Func<ulong, IntPtr> id2Pointer)
+        private static List<IntPtr> ReadTypeList(RuntimeProcess runtime, IntPtr listPointer, int nextOffset)
         {
-            var classTypesPointerPointer = id2Pointer(885835);
-            var classTypeVftablePointer = id2Pointer(285167);
-
-            List<Natives.ClassType> natives = new();
-            List<ClassType> instances = new();
-            IntPtr nextPointer = runtime.ReadPointer(classTypesPointerPointer);
-            while (nextPointer != IntPtr.Zero && nextPointer != classTypesPointerPointer)
+            List<IntPtr> typePointers = new();
+            IntPtr nextPointer = runtime.ReadPointer(listPointer);
+            while (nextPointer != IntPtr.Zero && nextPointer != listPointer)
             {
                 var nativePointer = nextPointer;
-                var native = runtime.ReadStructure<Natives.ClassType>(nativePointer);
-                nextPointer = native.Next;
-
-                if (native.Vftable != classTypeVftablePointer)
-                {
-                    var vftable = runtime.ToStaticAddress(native.Vftable);
-                    throw new InvalidOperationException($"unknown vftable @ {vftable:X}");
-                }
-
-                natives.Add(native);
-                ClassType instance = ReadClassType(runtime, nativePointer);
-                instances.Add(instance);
+                typePointers.Add(nativePointer);
+                nextPointer = runtime.ReadPointer(nativePointer + nextOffset);
             }
-            return instances;
-        }
-
-        private static ClassType ReadClassType(RuntimeProcess runtime, IntPtr nativePointer)
-        {
-            var native = runtime.ReadStructure<Natives.ClassType>(nativePointer);
-
-            ClassType instance = new();
-            instance.Pointer = nativePointer;
-            instance.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
-            instance.Size = native.Size;
-            instance.Alignment = native.Alignment;
-
-            var fieldSize = Marshal.SizeOf(typeof(Natives.ClassField));
-
-            List<ClassField> fields = new();
-            for (var fieldPointer = native.Fields.Start; fieldPointer != native.Fields.End; fieldPointer += fieldSize)
-            {
-                var field = ReadClassField(runtime, fieldPointer);
-                fields.Add(field);
-            }
-
-            instance.Fields.AddRange(fields);
-
-            return instance;
-        }
-
-        private static ClassField ReadClassField(RuntimeProcess runtime, IntPtr nativePointer)
-        {
-            var native = runtime.ReadStructure<Natives.ClassField>(nativePointer);
-
-            if (native.Unknown14 != 0 ||
-                native.Unknown18 != IntPtr.Zero ||
-                native.Unknown20 != IntPtr.Zero ||
-                native.Unknown28 != IntPtr.Zero ||
-                native.Unknown30 != -1 ||
-                native.Unknown34 != -1)
-            {
-
-            }
-
-            ClassField instance = new();
-            instance.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
-            instance.Type = native.Type;
-            instance.Offset = native.Offset;
-            return instance;
-        }
-
-        private static List<EnumType> ReadEnumTypes(RuntimeProcess runtime, Func<ulong, IntPtr> id2Pointer)
-        {
-            IntPtr enumTypesPointerPointer = id2Pointer(885839);
-            IntPtr enumTypeVftablePointer = id2Pointer(292531);
-
-            List<Natives.EnumType> natives = new();
-            List<EnumType> instances = new();
-            IntPtr nextPointer = runtime.ReadPointer(enumTypesPointerPointer);
-            while (nextPointer != IntPtr.Zero && nextPointer != enumTypesPointerPointer)
-            {
-                var nativePointer = nextPointer;
-                var native = runtime.ReadStructure<Natives.EnumType>(nativePointer);
-                nextPointer = native.Next;
-
-                if (native.Vftable != enumTypeVftablePointer)
-                {
-                    var vftable = runtime.ToStaticAddress(native.Vftable);
-                    throw new InvalidOperationException($"unknown vftable @ {vftable:X}");
-                }
-
-                natives.Add(native);
-                EnumType instance = ReadEnumType(runtime, nativePointer);
-                instances.Add(instance);
-            }
-            return instances;
-        }
-
-        private static EnumType ReadEnumType(RuntimeProcess runtime, IntPtr nativePointer)
-        {
-            var native = runtime.ReadStructure<Natives.EnumType>(nativePointer);
-
-            EnumType instance = new();
-            instance.Pointer = nativePointer;
-            instance.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
-            instance.Size = native.Size;
-            instance.Alignment = native.Alignment;
-            instance.Unknown0E = native.Unknown0E;
-
-            var memberSize = Marshal.SizeOf(typeof(Natives.EnumMember));
-
-            List<EnumMember> members = new();
-            for (var memberPointer = native.Members.Start; memberPointer != native.Members.End; memberPointer += memberSize)
-            {
-                var member = ReadEnumMember(runtime, memberPointer);
-                members.Add(member);
-            }
-
-            instance.Members.AddRange(members);
-
-            return instance;
-        }
-
-        private static EnumMember ReadEnumMember(RuntimeProcess runtime, IntPtr nativePointer)
-        {
-            var native = runtime.ReadStructure<Natives.EnumMember>(nativePointer);
-
-            EnumMember instance = new();
-            instance.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
-            instance.Value = native.Value;
-            return instance;
+            return typePointers;
         }
     }
 }

@@ -28,14 +28,14 @@ namespace DumpReflection.Natives
     [StructLayout(LayoutKind.Sequential)]
     internal struct ClassField
     {
-        public IntPtr Name;
-        public IntPtr Type;
-        public uint Offset;
-        public uint Unknown14;
-        public IntPtr Unknown18;
-        public IntPtr Unknown20;
-        public IntPtr Unknown28;
-        public int Unknown30;
-        public int Unknown34;
+        public IntPtr Name; // 00
+        public IntPtr Type; // 08
+        public uint Offset; // 10
+        public uint Unknown14; // 14
+        public IntPtr Unknown18; // 18
+        public IntPtr Unknown20; // 20
+        public IntPtr Unknown28; // 28
+        public int Unknown30; // 30
+        public int Unknown34; // 34
     }
 }

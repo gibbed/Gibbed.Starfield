@@ -20,17 +20,12 @@
  *    distribution.
  */
 
-using System;
-using System.Runtime.InteropServices;
-
-namespace DumpReflection.Natives
+namespace DumpReflection.Reflection
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal class EnumType
+    internal class ListType : CollectionType
     {
-        public BaseType Base; // 00
-        public IntPtr Next; // 10
-        public IntPtr Name; // 18
-        public StdVector Members; // 20
+        public ListType() : base(Natives.TypeId.List)
+        {
+        }
     }
 }
