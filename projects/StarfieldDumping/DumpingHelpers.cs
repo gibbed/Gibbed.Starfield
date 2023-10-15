@@ -20,15 +20,74 @@
  *    distribution.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using Gibbed.AddressLibrary;
 
 namespace StarfieldDumping
 {
     public static class DumpingHelpers
     {
-        public static Process FindSuitableProcess()
+        public delegate int MainDelegate(RuntimeProcess runtime, AddressLibrary addressLibrary, string[] args);
+
+        public static int Main(string[] args, MainDelegate callback)
+        {
+            if (callback == null)
+            {
+                throw new ArgumentNullException(nameof(callback));
+            }
+
+            var process = DumpingHelpers.FindSuitableProcess();
+            if (process == null)
+            {
+                Console.WriteLine("Failed to find suitable Starfield process.");
+                return -1;
+            }
+
+            var isSteamVersion = process.Modules
+                .Cast<ProcessModule>()
+                .Any(m => IsSteamModule(m.ModuleName) == true);
+            var isMsStoreVersion = isSteamVersion == false;
+
+            AddressLibrary addressLibrary;
+            try
+            {
+                addressLibrary = AddressLibraryLoader.LoadFor(process.MainModule.FileName, isMsStoreVersion);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Exception when fetching address library for Starfield:");
+                Console.WriteLine(e);
+                return -2;
+            }
+
+            if (addressLibrary == null)
+            {
+                Console.WriteLine("Failed to load address library for Starfield.");
+                return -3;
+            }
+
+            using RuntimeProcess runtime = new();
+            if (runtime.OpenProcess(process) == false)
+            {
+                Console.WriteLine("Failed to open Starfield process.");
+                return -4;
+            }
+
+            var result = callback(runtime, addressLibrary, args);
+            return result >= 0
+                ? result
+                : -5 + result;
+        }
+
+        private static bool IsSteamModule(string name)
+        {
+            return name.StartsWith("steam_api64", StringComparison.OrdinalIgnoreCase) == true;
+        }
+
+        private static Process FindSuitableProcess()
         {
             foreach (var processName in GetProcessNames())
             {

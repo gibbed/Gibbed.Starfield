@@ -34,62 +34,14 @@ namespace DumpReflection
     {
         public static void Main(string[] args)
         {
-            Environment.ExitCode = RealMain(args);
+            Environment.ExitCode = DumpingHelpers.Main(args, Dump);
             if (System.Diagnostics.Debugger.IsAttached == false)
             {
                 Console.ReadLine();
             }
         }
 
-        private static int RealMain(string[] args)
-        {
-            var process = DumpingHelpers.FindSuitableProcess();
-            if (process == null)
-            {
-                Console.WriteLine("Failed to find suitable Starfield process.");
-                return -1;
-            }
-
-            var isSteamVersion = process.Modules
-                .Cast<System.Diagnostics.ProcessModule>()
-                .Any(m => IsSteamModule(m.ModuleName) == true);
-            var isMsStoreVersion = isSteamVersion == false;
-
-            AddressLibrary addressLibrary;
-            try
-            {
-                addressLibrary = AddressLibraryLoader.LoadFor(process.MainModule.FileName, isMsStoreVersion);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Exception when fetching address library for Starfield:");
-                Console.WriteLine(e);
-                return -2;
-            }
-
-            if (addressLibrary == null)
-            {
-                Console.WriteLine("Failed to load address library for Starfield.");
-                return -3;
-            }
-
-            using RuntimeProcess runtime = new();
-            if (runtime.OpenProcess(process) == false)
-            {
-                Console.WriteLine("Failed to open Starfield process.");
-                return -4;
-            }
-
-            Dump(runtime, addressLibrary);
-            return 0;
-        }
-
-        private static bool IsSteamModule(string name)
-        {
-            return name.StartsWith("steam_api64", StringComparison.OrdinalIgnoreCase) == true;
-        }
-
-        private static void Dump(RuntimeProcess runtime, AddressLibrary addressLibrary)
+        private static int Dump(RuntimeProcess runtime, AddressLibrary addressLibrary, string[] args)
         {
             var mainModuleBaseAddressValue = runtime.Process.MainModule.BaseAddress.ToInt64();
             IntPtr Id2Pointer(ulong id)
