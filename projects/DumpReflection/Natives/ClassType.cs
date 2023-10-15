@@ -36,10 +36,8 @@ namespace DumpReflection.Natives
         public IntPtr UnknownCallback30; // 30
         public IntPtr UnknownCallback38; // 38
         public StdVector Fields; // 40
-        public IntPtr Unknown58; // 58
-        public IntPtr Unknown60; // 60
-        public IntPtr Unknown68; // 68
-        public StdVector Casts; // 70
+        public StdVector Upcasts; // 58
+        public StdVector Downcasts; // 70
         public uint Unknown88; // 88
         public ushort Unknown8C; // 8C
     }

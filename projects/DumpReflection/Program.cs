@@ -123,7 +123,7 @@ namespace DumpReflection
                         queue.Enqueue(field.TypePointer);
                     }
 
-                    foreach (var cast in classType.Casts)
+                    foreach (var cast in classType.Downcasts)
                     {
                         queue.Enqueue(cast.TypePointer);
                     }

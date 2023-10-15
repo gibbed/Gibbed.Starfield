@@ -34,17 +34,20 @@ namespace DumpReflection.Reflection
 
         private string _Name;
         private readonly List<ClassField> _Fields;
-        private readonly List<ClassCast> _Casts;
+        private readonly List<ClassCast> _Upcasts;
+        private readonly List<ClassCast> _Downcasts;
 
         public ClassType()
         {
             this._Fields = new();
-            this._Casts = new();
+            this._Upcasts = new();
+            this._Downcasts = new();
         }
 
         public override string Name => this._Name;
         public List<ClassField> Fields => this._Fields;
-        public List<ClassCast> Casts => this._Casts;
+        public List<ClassCast> Upcasts => this._Upcasts;
+        public List<ClassCast> Downcasts => this._Downcasts;
 
         protected override void Read(RuntimeProcess runtime, IntPtr nativePointer, Natives.ClassType native)
         {
@@ -70,16 +73,23 @@ namespace DumpReflection.Reflection
             }
 
             var castSize = Marshal.SizeOf(typeof(Natives.ClassCast));
-            List<ClassCast> casts = new();
-            for (var castPointer = native.Casts.Start; castPointer != native.Casts.End; castPointer += castSize)
+            List<ClassCast> upcasts = new();
+            for (var castPointer = native.Upcasts.Start; castPointer != native.Upcasts.End; castPointer += castSize)
             {
-                casts.Add(ReadCast(runtime, castPointer));
+                upcasts.Add(ReadCast(runtime, castPointer));
+            }
+            List<ClassCast> downcasts = new();
+            for (var castPointer = native.Downcasts.Start; castPointer != native.Downcasts.End; castPointer += castSize)
+            {
+                downcasts.Add(ReadCast(runtime, castPointer));
             }
 
             this._Fields.Clear();
             this._Fields.AddRange(fields);
-            this._Casts.Clear();
-            this._Casts.AddRange(casts);
+            this._Upcasts.Clear();
+            this._Upcasts.AddRange(upcasts);
+            this._Downcasts.Clear();
+            this._Downcasts.AddRange(downcasts);
         }
 
         private static ClassField ReadField(RuntimeProcess runtime, IntPtr nativePointer)
@@ -126,13 +136,22 @@ namespace DumpReflection.Reflection
                 field.Type = fieldType;
             }
 
-            foreach (var cast in this._Casts)
+            foreach (var upcast in this._Upcasts)
             {
-                if (typeMap.TryGetValue(cast.TypePointer, out var castType) == false)
+                if (typeMap.TryGetValue(upcast.TypePointer, out var castType) == false)
                 {
                     throw new InvalidOperationException();
                 }
-                cast.Type = castType;
+                upcast.Type = castType;
+            }
+
+            foreach (var downcast in this._Downcasts)
+            {
+                if (typeMap.TryGetValue(downcast.TypePointer, out var castType) == false)
+                {
+                    throw new InvalidOperationException();
+                }
+                downcast.Type = castType;
             }
         }
     }
