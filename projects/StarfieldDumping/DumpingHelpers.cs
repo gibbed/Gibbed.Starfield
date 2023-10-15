@@ -39,7 +39,7 @@ namespace StarfieldDumping
                 throw new ArgumentNullException(nameof(callback));
             }
 
-            var process = DumpingHelpers.FindSuitableProcess();
+            var process = FindSuitableProcess();
             if (process == null)
             {
                 Console.WriteLine("Failed to find suitable Starfield process.");
@@ -104,10 +104,18 @@ namespace StarfieldDumping
         {
             yield return "Starfield";
             yield return "Starfield.noaslr";
-            yield return "Starfield.noaslr.1.7.36.0";
-            yield return "Starfield.noaslr.1.7.33.0";
-            yield return "Starfield.noaslr.1.7.29.0";
-            yield return "Starfield.noaslr.1.7.23.0";
+            foreach (var version in GetVersions().Reverse())
+            {
+                yield return $"Starfield.noaslr.{version}";
+            }
+        }
+
+        private static IEnumerable<string> GetVersions()
+        {
+            yield return "1.7.23.0";
+            yield return "1.7.29.0";
+            yield return "1.7.33.0";
+            yield return "1.7.36.0";
         }
     }
 }
