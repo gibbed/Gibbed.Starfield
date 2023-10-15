@@ -201,7 +201,7 @@ namespace DumpLoadedPluginList
                 {
                     return (this.Flags & 0x100) == 0
                         ? $"{this.Id:X02}"
-                        : $"FE{this.LightId:X03}";
+                        : $"{this.Id:X02}{this.LightId:X03}";
                 }
             }
         }
