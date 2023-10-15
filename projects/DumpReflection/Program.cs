@@ -94,47 +94,23 @@ namespace DumpReflection
                 }
                 Console.WriteLine();
             }
-        }
 
-        private static IEnumerable<(ulong id, string name)> GetTypeNames()
-        {
-            yield return (780674, "int16_t");
-            yield return (780678, "int8_t");
-            yield return (780680, "uint8_t");
-            yield return (780684, "int64_t");
-            yield return (780687, "double");
-            yield return (780690, "uint16_t");
-            yield return (780692, "int32_t");
-            yield return (780696, "bool");
-            yield return (780699, "float");
-            yield return (780701, "uint64_t");
-            yield return (780704, "uint32_t");
-
-            yield return (780711, "BSFixedString");
-
-            yield return (887377, "BSReflection::TESFormPointer<ActorValueInfo *>");
-            yield return (887380, "BSReflection::TESFormPointer<TESObjectLIGH *>");
-            yield return (887383, "BSReflection::TESFormPointer<BGSArtObject *>");
-
-            yield return (772740, "BSTArray<TESForm *>");
-            yield return (772741, "BSReflection::StdUniquePtrType<BSAttachConfig::IAttachableObject>");
-
-            yield return (780005, "BSTArray<std::unique_ptr<BSSequence::Event>>");
+            return 0;
         }
 
         private static List<ClassType> ReadClassTypes(RuntimeProcess runtime, Func<ulong, IntPtr> id2Pointer)
         {
-            var classTypesPointer = id2Pointer(885835);
+            var classTypesPointerPointer = id2Pointer(885835);
             var classTypeVftablePointer = id2Pointer(285167);
 
             List<Natives.ClassType> natives = new();
             List<ClassType> instances = new();
-            IntPtr next = runtime.ReadPointer(classTypesPointer);
-            while (next != IntPtr.Zero && next != classTypesPointer)
+            IntPtr nextPointer = runtime.ReadPointer(classTypesPointerPointer);
+            while (nextPointer != IntPtr.Zero && nextPointer != classTypesPointerPointer)
             {
-                var current = next;
-                var native = runtime.ReadStructure<Natives.ClassType>(current);
-                next = native.Next;
+                var nativePointer = nextPointer;
+                var native = runtime.ReadStructure<Natives.ClassType>(nativePointer);
+                nextPointer = native.Next;
 
                 if (native.Vftable != classTypeVftablePointer)
                 {
@@ -143,7 +119,7 @@ namespace DumpReflection
                 }
 
                 natives.Add(native);
-                ClassType instance = ReadClassType(runtime, current);
+                ClassType instance = ReadClassType(runtime, nativePointer);
                 instances.Add(instance);
             }
             return instances;
@@ -196,17 +172,17 @@ namespace DumpReflection
 
         private static List<EnumType> ReadEnumTypes(RuntimeProcess runtime, Func<ulong, IntPtr> id2Pointer)
         {
-            IntPtr enumTypesPointer = id2Pointer(885839);
+            IntPtr enumTypesPointerPointer = id2Pointer(885839);
             IntPtr enumTypeVftablePointer = id2Pointer(292531);
 
             List<Natives.EnumType> natives = new();
             List<EnumType> instances = new();
-            IntPtr next = runtime.ReadPointer(enumTypesPointer);
-            while (next != IntPtr.Zero && next != enumTypesPointer)
+            IntPtr nextPointer = runtime.ReadPointer(enumTypesPointerPointer);
+            while (nextPointer != IntPtr.Zero && nextPointer != enumTypesPointerPointer)
             {
-                var current = next;
-                var native = runtime.ReadStructure<Natives.EnumType>(current);
-                next = native.Next;
+                var nativePointer = nextPointer;
+                var native = runtime.ReadStructure<Natives.EnumType>(nativePointer);
+                nextPointer = native.Next;
 
                 if (native.Vftable != enumTypeVftablePointer)
                 {
@@ -215,7 +191,7 @@ namespace DumpReflection
                 }
 
                 natives.Add(native);
-                EnumType instance = ReadEnumType(runtime, current);
+                EnumType instance = ReadEnumType(runtime, nativePointer);
                 instances.Add(instance);
             }
             return instances;
