@@ -41,7 +41,9 @@ namespace DumpReflection.Reflection
         }
 
         #region Properties
-        public override string Name => $"{this._Name}<{this.ItemTypeName}>";
+        public override string Name => this._Name == "std::map"
+            ? $"std::set<{this.ItemTypeName}>"
+            : $"{this._Name}<{this.ItemTypeName}>";
         public IntPtr ItemTypePointer => this._ItemTypePointer;
         public IType ItemType => this._ItemType;
         public string ItemTypeName => $"{this._ItemType?.Name ?? ("unknown:" + this._ItemTypePointer.ToString("X"))}";
