@@ -40,6 +40,16 @@ namespace DumpReflection.Reflection
                 throw new InvalidOperationException();
             }
 
+            var knownFlags =
+                Natives.TypeFlags.HasUnknownCallback20 |
+                Natives.TypeFlags.HasUnknownCallback38 |
+                Natives.TypeFlags.HasUnknownCallback30 |
+                Natives.TypeFlags.HasUnknownCallback28;
+            if (this.TypeFlags != knownFlags)
+            {
+                throw new InvalidOperationException();
+            }
+
             this._Name = Helpers.GetStringFromVftable(runtime, native.Vftable, 4);
         }
     }

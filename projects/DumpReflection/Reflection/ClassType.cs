@@ -65,6 +65,44 @@ namespace DumpReflection.Reflection
                 throw new InvalidOperationException();
             }
 
+            var expectedTypeFlags = Natives.TypeFlags.None;
+            if (native.UnknownCallback20 != IntPtr.Zero)
+            {
+                expectedTypeFlags |= Natives.TypeFlags.HasUnknownCallback20;
+            }
+            if (native.UnknownCallback28 != IntPtr.Zero)
+            {
+                expectedTypeFlags |= Natives.TypeFlags.HasUnknownCallback28;
+            }
+            if (native.UnknownCallback30 != IntPtr.Zero)
+            {
+                expectedTypeFlags |= Natives.TypeFlags.HasUnknownCallback30;
+            }
+            if (native.UnknownCallback38 != IntPtr.Zero)
+            {
+                expectedTypeFlags |= Natives.TypeFlags.HasUnknownCallback38;
+            }
+            if ((native.Flags & Natives.ClassFlags.ClaimsToBeAStruct) != 0)
+            {
+                expectedTypeFlags |= Natives.TypeFlags.ClaimsToBeAStruct;
+            }
+
+            if ((native.Base.TypeFlags & ~Natives.TypeFlags.IsStruct) != expectedTypeFlags)
+            {
+                throw new InvalidOperationException();
+            }
+
+            var knownFlags =
+                Natives.ClassFlags.Unknown1 |
+                Natives.ClassFlags.Unknown2 |
+                Natives.ClassFlags.ClaimsToBeAStruct |
+                Natives.ClassFlags.Unknown4;
+            var unknownFlags = native.Flags & ~knownFlags;
+            if (unknownFlags != Natives.ClassFlags.None)
+            {
+                throw new InvalidOperationException();
+            }
+
             var fieldSize = Marshal.SizeOf(typeof(Natives.ClassField));
             List<ClassField> fields = new();
             for (var fieldPointer = native.Fields.Start; fieldPointer != native.Fields.End; fieldPointer += fieldSize)

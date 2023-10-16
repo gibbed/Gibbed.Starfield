@@ -57,6 +57,11 @@ namespace DumpReflection.Reflection
                 throw new InvalidOperationException();
             }
 
+            if (this.TypeFlags != Natives.TypeFlags.Everything)
+            {
+                throw new InvalidOperationException();
+            }
+
             this._Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
 
             var memberSize = Marshal.SizeOf(typeof(Natives.EnumMember));

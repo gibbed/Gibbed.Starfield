@@ -58,6 +58,18 @@ namespace DumpReflection.Reflection
                 throw new InvalidOperationException();
             }
 
+            var knownFlags =
+                Natives.TypeFlags.HasUnknownCallback20 |
+                Natives.TypeFlags.HasUnknownCallback38 |
+                Natives.TypeFlags.HasUnknownCallback30 |
+                Natives.TypeFlags.HasUnknownCallback28;
+            var unknownFlags = this.TypeFlags & ~knownFlags;
+            if (this.TypeFlags != Natives.TypeFlags.Everything &&
+                unknownFlags != Natives.TypeFlags.None)
+            {
+                throw new InvalidOperationException();
+            }
+
             this._Name = Helpers.GetStringFromVftable(runtime, native.Vftable, 4);
             this._UnderlyingTypePointer = Helpers.GetPointerFromVftable(runtime, native.Vftable, 6);
         }
