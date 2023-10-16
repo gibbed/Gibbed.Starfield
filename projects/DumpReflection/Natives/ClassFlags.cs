@@ -21,32 +21,21 @@
  */
 
 using System;
-using System.Runtime.InteropServices;
 
 namespace DumpReflection.Natives
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal class ClassType
+    [Flags]
+    public enum ClassFlags : byte
     {
-        public BaseType Base; // 00
-        public IntPtr Next; // 10
-        public IntPtr Name; // 18
-        public IntPtr UnknownCallback20; // 20
-        public IntPtr UnknownCallback28; // 28
-        public IntPtr UnknownCallback30; // 30
-        public IntPtr UnknownCallback38; // 38
-        public StdVector Fields; // 40
-        public StdVector Upcasts; // 58
-        public StdVector Downcasts; // 70
-        public ClassFlags Flags; // 88
-        public ushort Unknown8C; // 8C
+        None = 0,
 
-        static ClassType()
-        {
-            if (Marshal.SizeOf(typeof(ClassType)) != 0x90)
-            {
-                throw new InvalidOperationException();
-            }
-        }
+        Unknown0 = 1 << 0,
+        Unknown1 = 1 << 1,
+        Unknown2 = 1 << 2,
+        ClaimsToBeAStruct = 1 << 3,
+        Unknown4 = 1 << 4,
+        Unknown5 = 1 << 5,
+        Unknown6 = 1 << 6,
+        Unknown7 = 1 << 7,
     }
 }

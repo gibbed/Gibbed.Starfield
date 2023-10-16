@@ -28,5 +28,16 @@ namespace DumpReflection.Natives
     internal enum TypeFlags : byte
     {
         None = 0,
+
+        Unknown0 = 1 << 0,
+        HasUnknownCallback20 = 1 << 1,
+        HasUnknownCallback38 = 1 << 2,
+        HasUnknownCallback30 = 1 << 3,
+        HasUnknownCallback28 = 1 << 4,
+        ClaimsToBeAStruct = 1 << 5,
+        IsStruct = 1 << 6,
+        Unknown7 = 1 << 7,
+
+        Everything = 0xFF,
     }
 }
