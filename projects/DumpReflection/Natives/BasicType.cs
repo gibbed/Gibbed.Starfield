@@ -31,6 +31,7 @@ namespace DumpReflection.Natives
         public BaseType Base; // 00
         public IntPtr Name; // 10
         public byte Id; // 18
+        [MarshalAs(UnmanagedType.U1)]
         public bool IsSigned; // 19
         public byte Unknown1A; // 1A
         public byte Unknown1B; // 1B
