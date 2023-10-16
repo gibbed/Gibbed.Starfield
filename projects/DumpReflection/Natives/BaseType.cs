@@ -33,5 +33,13 @@ namespace DumpReflection.Natives
         public ushort TypeAlignment; // 0C
         public TypeId TypeId; // 0E
         public TypeFlags TypeFlags; // 0F
+
+        static BaseType()
+        {
+            if (Marshal.SizeOf(typeof(BaseType)) != 0x10)
+            {
+                throw new InvalidOperationException();
+            }
+        }
     }
 }

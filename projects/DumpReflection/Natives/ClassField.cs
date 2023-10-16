@@ -37,5 +37,13 @@ namespace DumpReflection.Natives
         public IntPtr Unknown28; // 28
         public int Unknown30; // 30
         public int Unknown34; // 34
+
+        static ClassField()
+        {
+            if (Marshal.SizeOf(typeof(ClassField)) != 0x38)
+            {
+                throw new InvalidOperationException();
+            }
+        }
     }
 }

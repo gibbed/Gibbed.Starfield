@@ -40,5 +40,13 @@ namespace DumpReflection.Natives
         public StdVector Downcasts; // 70
         public uint Unknown88; // 88
         public ushort Unknown8C; // 8C
+
+        static ClassType()
+        {
+            if (Marshal.SizeOf(typeof(ClassType)) != 0x90)
+            {
+                throw new InvalidOperationException();
+            }
+        }
     }
 }

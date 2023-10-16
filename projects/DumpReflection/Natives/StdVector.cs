@@ -31,5 +31,13 @@ namespace DumpReflection.Natives
         public IntPtr Start; // 00
         public IntPtr End; // 08
         public IntPtr Allocated; // 10
+
+        static StdVector()
+        {
+            if (Marshal.SizeOf(typeof(StdVector)) != 0x18)
+            {
+                throw new InvalidOperationException();
+            }
+        }
     }
 }

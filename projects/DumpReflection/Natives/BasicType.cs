@@ -35,5 +35,13 @@ namespace DumpReflection.Natives
         public byte Unknown1A; // 1A
         public byte Unknown1B; // 1B
         public uint Unknown1C; // 1C
+
+        static BasicType()
+        {
+            if (Marshal.SizeOf(typeof(BasicType)) != 0x20)
+            {
+                throw new InvalidOperationException();
+            }
+        }
     }
 }

@@ -30,5 +30,13 @@ namespace DumpReflection.Natives
     {
         public IntPtr Type; // 00
         public long Offset; // 08
+
+        static ClassCast()
+        {
+            if (Marshal.SizeOf(typeof(ClassCast)) != 0x10)
+            {
+                throw new InvalidOperationException();
+            }
+        }
     }
 }

@@ -32,5 +32,13 @@ namespace DumpReflection.Natives
         public IntPtr Next; // 10
         public IntPtr Name; // 18
         public StdVector Members; // 20
+
+        static EnumType()
+        {
+            if (Marshal.SizeOf(typeof(EnumType)) != 0x38)
+            {
+                throw new InvalidOperationException();
+            }
+        }
     }
 }
