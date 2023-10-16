@@ -149,11 +149,23 @@ namespace DumpReflection
 
             foreach (var instance in typeMap.Values.OfType<ClassType>())
             {
-                Console.WriteLine($"{instance.Name}");
+                Console.WriteLine($"class {instance.Name}");
 
                 foreach (var field in instance.Fields)
                 {
                     Console.WriteLine($"  {field.Name} : {field.Type.Name} @{field.Offset:X}");
+                }
+
+                Console.WriteLine();
+            }
+
+            foreach (var instance in typeMap.Values.OfType<EnumType>())
+            {
+                Console.WriteLine($"enum {instance.Name}");
+
+                foreach (var member in instance.Members)
+                {
+                    Console.WriteLine($"  {member.Name} = {member.Value}");
                 }
 
                 Console.WriteLine();
