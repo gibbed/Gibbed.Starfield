@@ -20,25 +20,22 @@
  *    distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using StarfieldDumping;
-
-namespace DumpReflection.Reflection
+namespace DumpReflection.Attributes
 {
-    internal interface IType
+    [System.Flags]
+    internal enum AttributeUsage : byte
     {
-        public IntPtr NativePointer { get; }
-        public IntPtr VftablePointer { get; }
-        public uint TypeSize { get; }
-        public ushort TypeAlignment { get; }
-        public Natives.TypeId TypeId { get; }
-        public Natives.TypeFlags TypeFlags { get; }
-        public string Name { get; }
-        public List<Attributes.IAttribute> Attributes { get; }
+        None = 0,
 
-        public void Read(RuntimeProcess runtime, IntPtr nativePointer);
-
-        public void Resolve(Dictionary<IntPtr, IType> typeMap);
+        Class = 1 << 1,
+        Property = 1 << 2,
+        Enum = 1 << 3,
+        EnumConstant = 1 << 4,
+        ReleaseFinal = 1 << 5,
+        
+        ClassAndProperty = Class | Property,
+        Type = Class | Property | Enum,
+        
+        All = Class | Property | Enum | EnumConstant,
     }
 }

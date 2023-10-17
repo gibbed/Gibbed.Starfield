@@ -147,6 +147,11 @@ namespace DumpReflection
                 instance.Resolve(typeMap);
             }
 
+            // attributes
+            var classAttributesHashMapPointerPointer = Id2Pointer(885842);
+            var classAttributesHashMapPointer = runtime.ReadPointer(classAttributesHashMapPointerPointer);
+            ReadClassAttributes(runtime, classAttributesHashMapPointer, typeMap);
+
             foreach (var instance in typeMap.Values.OfType<ClassType>())
             {
                 Console.WriteLine($"class {instance.Name}");
@@ -172,6 +177,74 @@ namespace DumpReflection
             }
 
             return 0;
+        }
+
+        private static void ReadClassAttributes(RuntimeProcess runtime, IntPtr nativePointer, Dictionary<IntPtr, IType> typeMap)
+        {
+            var native = runtime.ReadStructure<Natives.ClassAttributesHashMap>(nativePointer);
+
+            if (native.Size > int.MaxValue)
+            {
+                throw new InvalidOperationException();
+            }
+
+            var entryCount = (int)native.Size;
+
+            var entrySize = Natives.ClassAttributesHashMap.EntrySize;
+            var endPointer = native.Table + entrySize * entryCount;
+            var table = new Natives.ClassAttributesHashMap.Entry[native.Size];
+            var entryPointer = native.Table;
+            for (var i = 0; entryPointer != endPointer; i++, entryPointer += entrySize)
+            {
+                table[i] = runtime.ReadStructure<Natives.ClassAttributesHashMap.Entry>(entryPointer);
+            }
+
+            int index = 0;
+            while (index < entryCount)
+            {
+                while (index < entryCount && table[index].NextIndex == -1)
+                {
+                    index++;
+                }
+
+                var pair = table[index].Pair;
+                var type = typeMap[pair.Key];
+                if (type.Attributes.Count > 0)
+                {
+                    throw new InvalidOperationException();
+                }
+                type.Attributes.Clear();
+                type.Attributes.AddRange(ReadAttributes(runtime, pair.Value, typeMap));
+                index++;
+            }
+        }
+
+        private static List<Attributes.IAttribute> ReadAttributes(RuntimeProcess runtime, Natives.ClassAttributes native, Dictionary<IntPtr, IType> typeMap)
+        {
+            List<Attributes.IAttribute> attributes = new();
+            int nextOffset = native.FirstOffset;
+            while (nextOffset != -1)
+            {
+                var attributePointer = native.Data.Start + nextOffset;
+                var attribute = runtime.ReadStructure<Natives.ClassAttribute>(attributePointer);
+                attributes.Add(ReadAttribute(runtime, attributePointer, attribute, typeMap));
+                nextOffset = attribute.NextOffset;
+            }
+            return attributes;
+        }
+
+        private static Attributes.IAttribute ReadAttribute(RuntimeProcess runtime, IntPtr nativePointer, Natives.ClassAttribute native, Dictionary<IntPtr, IType> typeMap)
+        {
+            var type = typeMap[native.Type];
+            IntPtr dataPointer = nativePointer - ((int)type.TypeSize).Align(8);
+            var attribute = AttributeFactory.Create(type.Name);
+            var size = Marshal.SizeOf(attribute.NativeType);
+            if (size != type.TypeSize)
+            {
+                throw new InvalidOperationException();
+            }
+            attribute.Read(runtime, dataPointer, typeMap);
+            return attribute;
         }
 
         private static List<IntPtr> ReadTypeList(RuntimeProcess runtime, IntPtr listPointer, int nextOffset)

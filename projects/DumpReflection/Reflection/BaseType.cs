@@ -35,7 +35,13 @@ namespace DumpReflection.Reflection
         private ushort _TypeAlignment;
         private Natives.TypeId _TypeId;
         private Natives.TypeFlags _TypeFlags;
+        private readonly List<Attributes.IAttribute> _Attributes;
         #endregion
+
+        public BaseType()
+        {
+            this._Attributes = new();
+        }
 
         #region Properties
         public IntPtr NativePointer => this._NativePointer;
@@ -45,6 +51,7 @@ namespace DumpReflection.Reflection
         public Natives.TypeId TypeId => this._TypeId;
         public Natives.TypeFlags TypeFlags => this._TypeFlags;
         public abstract string Name { get; }
+        public List<Attributes.IAttribute> Attributes => this._Attributes;
         #endregion
 
         public void Read(RuntimeProcess runtime, IntPtr nativePointer)

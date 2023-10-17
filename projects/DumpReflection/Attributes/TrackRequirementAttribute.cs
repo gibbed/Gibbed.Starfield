@@ -22,23 +22,36 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using DumpReflection.Reflection;
 using StarfieldDumping;
 
-namespace DumpReflection.Reflection
+namespace DumpReflection.Attributes
 {
-    internal interface IType
+    internal class TrackRequirementAttribute : BaseAttribute<TrackRequirementAttribute.Native>
     {
-        public IntPtr NativePointer { get; }
-        public IntPtr VftablePointer { get; }
-        public uint TypeSize { get; }
-        public ushort TypeAlignment { get; }
-        public Natives.TypeId TypeId { get; }
-        public Natives.TypeFlags TypeFlags { get; }
-        public string Name { get; }
-        public List<Attributes.IAttribute> Attributes { get; }
+        public IType Unknown0 { get; set; }
+        public IntPtr Unknown8 { get; set; }
 
-        public void Read(RuntimeProcess runtime, IntPtr nativePointer);
+        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
+        {
+            this.Unknown0 = typeMap[native.Unknown0];
+            this.Unknown8 = native.Unknown8;
+        }
 
-        public void Resolve(Dictionary<IntPtr, IType> typeMap);
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct Native
+        {
+            public IntPtr Unknown0; // 0
+            public IntPtr Unknown8; // 8
+
+            static Native()
+            {
+                if (Marshal.SizeOf(typeof(Native)) != 0x10)
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+        }
     }
 }

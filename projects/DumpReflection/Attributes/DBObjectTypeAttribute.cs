@@ -22,23 +22,34 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+using DumpReflection.Reflection;
 using StarfieldDumping;
 
-namespace DumpReflection.Reflection
+namespace DumpReflection.Attributes
 {
-    internal interface IType
+    internal class DBObjectTypeAttribute : BaseAttribute<DBObjectTypeAttribute.Native>
     {
-        public IntPtr NativePointer { get; }
-        public IntPtr VftablePointer { get; }
-        public uint TypeSize { get; }
-        public ushort TypeAlignment { get; }
-        public Natives.TypeId TypeId { get; }
-        public Natives.TypeFlags TypeFlags { get; }
-        public string Name { get; }
-        public List<Attributes.IAttribute> Attributes { get; }
+        public string DBObjectType { get; set; }
 
-        public void Read(RuntimeProcess runtime, IntPtr nativePointer);
+        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
+        {
+            this.DBObjectType = runtime.ReadStringZ(native.DBObjectType, Encoding.ASCII);
+        }
 
-        public void Resolve(Dictionary<IntPtr, IType> typeMap);
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct Native
+        {
+            public IntPtr DBObjectType; // 0
+
+            static Native()
+            {
+                if (Marshal.SizeOf(typeof(Native)) != 0x8)
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+        }
     }
 }

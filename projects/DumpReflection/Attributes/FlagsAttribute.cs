@@ -20,25 +20,9 @@
  *    distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using StarfieldDumping;
-
-namespace DumpReflection.Reflection
+namespace DumpReflection.Attributes
 {
-    internal interface IType
+    internal class FlagsAttribute : EmptyBaseAttribute
     {
-        public IntPtr NativePointer { get; }
-        public IntPtr VftablePointer { get; }
-        public uint TypeSize { get; }
-        public ushort TypeAlignment { get; }
-        public Natives.TypeId TypeId { get; }
-        public Natives.TypeFlags TypeFlags { get; }
-        public string Name { get; }
-        public List<Attributes.IAttribute> Attributes { get; }
-
-        public void Read(RuntimeProcess runtime, IntPtr nativePointer);
-
-        public void Resolve(Dictionary<IntPtr, IType> typeMap);
     }
 }

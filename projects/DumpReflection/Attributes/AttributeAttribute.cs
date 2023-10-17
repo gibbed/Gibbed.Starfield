@@ -22,23 +22,33 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using DumpReflection.Reflection;
 using StarfieldDumping;
 
-namespace DumpReflection.Reflection
+namespace DumpReflection.Attributes
 {
-    internal interface IType
+    internal class AttributeAttribute : BaseAttribute<AttributeAttribute.Native>
     {
-        public IntPtr NativePointer { get; }
-        public IntPtr VftablePointer { get; }
-        public uint TypeSize { get; }
-        public ushort TypeAlignment { get; }
-        public Natives.TypeId TypeId { get; }
-        public Natives.TypeFlags TypeFlags { get; }
-        public string Name { get; }
-        public List<Attributes.IAttribute> Attributes { get; }
+        public AttributeUsage Usage { get; set; }
 
-        public void Read(RuntimeProcess runtime, IntPtr nativePointer);
+        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
+        {
+            this.Usage = native.Usage;
+        }
 
-        public void Resolve(Dictionary<IntPtr, IType> typeMap);
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct Native
+        {
+            public AttributeUsage Usage; // 0
+
+            static Native()
+            {
+                if (Marshal.SizeOf(typeof(Native)) != 0x1)
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+        }
     }
 }

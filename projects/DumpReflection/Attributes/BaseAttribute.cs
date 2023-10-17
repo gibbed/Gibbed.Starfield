@@ -22,23 +22,29 @@
 
 using System;
 using System.Collections.Generic;
+using DumpReflection.Reflection;
 using StarfieldDumping;
 
-namespace DumpReflection.Reflection
+namespace DumpReflection.Attributes
 {
-    internal interface IType
+    internal abstract class BaseAttribute<TNative> : IAttribute
     {
-        public IntPtr NativePointer { get; }
-        public IntPtr VftablePointer { get; }
-        public uint TypeSize { get; }
-        public ushort TypeAlignment { get; }
-        public Natives.TypeId TypeId { get; }
-        public Natives.TypeFlags TypeFlags { get; }
-        public string Name { get; }
-        public List<Attributes.IAttribute> Attributes { get; }
+        #region Fields
+        private IntPtr _NativePointer;
+        #endregion
 
-        public void Read(RuntimeProcess runtime, IntPtr nativePointer);
+        #region Properties
+        public IntPtr NativePointer => this._NativePointer;
+        public Type NativeType => typeof(TNative);
+        #endregion
 
-        public void Resolve(Dictionary<IntPtr, IType> typeMap);
+        public void Read(RuntimeProcess runtime, IntPtr nativePointer, Dictionary<IntPtr, IType> typeMap)
+        {
+            TNative native = runtime.ReadStructure<TNative>(nativePointer);
+            this._NativePointer = nativePointer;
+            Read(runtime, native, typeMap);
+        }
+
+        protected abstract void Read(RuntimeProcess runtime, TNative native, Dictionary<IntPtr, IType> typeMap);
     }
 }

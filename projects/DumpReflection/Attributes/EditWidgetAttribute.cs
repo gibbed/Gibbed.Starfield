@@ -22,23 +22,37 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using System.Text;
+using DumpReflection.Reflection;
 using StarfieldDumping;
 
-namespace DumpReflection.Reflection
+namespace DumpReflection.Attributes
 {
-    internal interface IType
+    internal class EditWidgetAttribute : BaseAttribute<EditWidgetAttribute.Native>
     {
-        public IntPtr NativePointer { get; }
-        public IntPtr VftablePointer { get; }
-        public uint TypeSize { get; }
-        public ushort TypeAlignment { get; }
-        public Natives.TypeId TypeId { get; }
-        public Natives.TypeFlags TypeFlags { get; }
-        public string Name { get; }
-        public List<Attributes.IAttribute> Attributes { get; }
+        public string Name { get; set; }
+        public ulong Unknown { get; set; }
 
-        public void Read(RuntimeProcess runtime, IntPtr nativePointer);
+        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
+        {
+            this.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
+            this.Unknown = native.Unknown;
+        }
 
-        public void Resolve(Dictionary<IntPtr, IType> typeMap);
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct Native
+        {
+            public IntPtr Name; // 0
+            public ulong Unknown; // 8
+
+            static Native()
+            {
+                if (Marshal.SizeOf(typeof(Native)) != 0x10)
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+        }
     }
 }

@@ -21,24 +21,23 @@
  */
 
 using System;
-using System.Collections.Generic;
-using StarfieldDumping;
+using System.Runtime.InteropServices;
 
-namespace DumpReflection.Reflection
+namespace DumpReflection.Natives
 {
-    internal interface IType
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct ClassAttributes
     {
-        public IntPtr NativePointer { get; }
-        public IntPtr VftablePointer { get; }
-        public uint TypeSize { get; }
-        public ushort TypeAlignment { get; }
-        public Natives.TypeId TypeId { get; }
-        public Natives.TypeFlags TypeFlags { get; }
-        public string Name { get; }
-        public List<Attributes.IAttribute> Attributes { get; }
+        public StdVector Data; // 00
+        public int FirstOffset; // 18
+        public int LastOffset; // 18
 
-        public void Read(RuntimeProcess runtime, IntPtr nativePointer);
-
-        public void Resolve(Dictionary<IntPtr, IType> typeMap);
+        static ClassAttributes()
+        {
+            if (Marshal.SizeOf(typeof(ClassAttributes)) != 0x20)
+            {
+                throw new InvalidOperationException();
+            }
+        }
     }
 }

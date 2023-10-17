@@ -22,23 +22,15 @@
 
 using System;
 using System.Collections.Generic;
+using DumpReflection.Reflection;
 using StarfieldDumping;
 
-namespace DumpReflection.Reflection
+namespace DumpReflection.Attributes
 {
-    internal interface IType
+    internal interface IAttribute
     {
-        public IntPtr NativePointer { get; }
-        public IntPtr VftablePointer { get; }
-        public uint TypeSize { get; }
-        public ushort TypeAlignment { get; }
-        public Natives.TypeId TypeId { get; }
-        public Natives.TypeFlags TypeFlags { get; }
-        public string Name { get; }
-        public List<Attributes.IAttribute> Attributes { get; }
+        Type NativeType { get; }
 
-        public void Read(RuntimeProcess runtime, IntPtr nativePointer);
-
-        public void Resolve(Dictionary<IntPtr, IType> typeMap);
+        void Read(RuntimeProcess runtime, IntPtr nativePointer, Dictionary<IntPtr, IType> typeMap);
     }
 }
