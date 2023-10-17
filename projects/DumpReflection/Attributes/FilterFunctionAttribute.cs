@@ -20,10 +20,15 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class FilterFunctionAttribute : BasePointerAttribute
     {
         // TODO(gibbed): pointer to some object with a callback + other data?
+        public FilterFunctionAttribute(IType type) : base(type)
+        {
+        }
     }
 }

@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class AllowDataBindingAttribute : BaseByteAttribute
     {
+        public AllowDataBindingAttribute(IType type) : base(type)
+        {
+        }
     }
 }

@@ -24,18 +24,27 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal abstract class BaseEmptyAttribute : BaseAttribute<BaseEmptyAttribute.Native>
     {
+        protected BaseEmptyAttribute(IType type) : base(type)
+        {
+        }
+
         protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
         {
             if (native.Dummy != 0)
             {
                 throw new InvalidOperationException();
             }
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
         }
 
         [StructLayout(LayoutKind.Sequential)]

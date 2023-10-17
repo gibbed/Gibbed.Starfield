@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class FlagsAttribute : BaseEmptyAttribute
     {
+        public FlagsAttribute(IType type) : base(type)
+        {
+        }
     }
 }

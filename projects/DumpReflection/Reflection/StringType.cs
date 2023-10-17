@@ -21,6 +21,7 @@
  */
 
 using System;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Reflection
@@ -35,7 +36,7 @@ namespace DumpReflection.Reflection
         {
             this.Read(nativePointer, native);
 
-            if (this.TypeId != Natives.TypeId.String)
+            if (this.Kind != Natives.TypeKind.String)
             {
                 throw new InvalidOperationException();
             }
@@ -45,12 +46,16 @@ namespace DumpReflection.Reflection
                 Natives.TypeFlags.HasUnknownCallback38 |
                 Natives.TypeFlags.HasUnknownCallback30 |
                 Natives.TypeFlags.HasUnknownCallback28;
-            if (this.TypeFlags != knownFlags)
+            if (this.Flags != knownFlags)
             {
                 throw new InvalidOperationException();
             }
 
             this._Name = Helpers.GetStringFromVftable(runtime, native.Vftable, 4);
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
         }
     }
 }

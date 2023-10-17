@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace DumpReflection.Reflection
 {
@@ -42,6 +43,38 @@ namespace DumpReflection.Reflection
         public long Value { get; set; }
         public List<Attributes.IAttribute> Attributes => this._Attributes;
         #endregion
+
+        public void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WriteStartObject();
+
+            var oldFormatting = writer.Formatting;
+            if (this.Attributes.Count == 0)
+            {
+                writer.Formatting = Formatting.None;
+            }
+
+            writer.WritePropertyName("name");
+            writer.WriteValue(this.Name);
+
+            writer.WritePropertyName("value");
+            writer.WriteValue(this.Value);
+
+            if (this.Attributes.Count > 0)
+            {
+                writer.WritePropertyName("attributes");
+                writer.WriteStartArray();
+                foreach (var attribute in this.Attributes)
+                {
+                    attribute.WriteJson(writer, pointer2Id);
+                }
+                writer.WriteEndArray();
+            }
+
+            writer.WriteEndObject();
+
+            writer.Formatting = oldFormatting;
+        }
 
         public override string ToString()
         {

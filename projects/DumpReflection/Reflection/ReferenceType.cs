@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Reflection
@@ -29,21 +30,19 @@ namespace DumpReflection.Reflection
     internal abstract class ReferenceType : BaseType<Natives.BaseType>
     {
         #region Fields
-        private readonly Natives.TypeId _ExpectedTypeId;
+        private readonly Natives.TypeKind _ExpectedTypeId;
         private string _Name;
         private IntPtr _UnderlyingTypePointer;
         private IType _UnderlyingType;
         #endregion
 
-        protected ReferenceType(Natives.TypeId expectedTypeId)
+        protected ReferenceType(Natives.TypeKind expectedTypeId)
         {
             this._ExpectedTypeId = expectedTypeId;
         }
 
         #region Properties
-        public override string Name => this.UnderlyingTypePointer != IntPtr.Zero
-            ? $"{this._Name}<{this.UnderlyingTypeName}>"
-            : $"{this._Name}";
+        public override string Name => this._Name;
         public IntPtr UnderlyingTypePointer => this._UnderlyingTypePointer;
         public IType UnderlyingType => this._UnderlyingType;
         public string UnderlyingTypeName => $"{this._UnderlyingType?.Name ?? ("unknown:" + this._UnderlyingTypePointer.ToString("X"))}";
@@ -53,7 +52,7 @@ namespace DumpReflection.Reflection
         {
             this.Read(nativePointer, native);
 
-            if (this.TypeId != this._ExpectedTypeId)
+            if (this.Kind != this._ExpectedTypeId)
             {
                 throw new InvalidOperationException();
             }
@@ -63,8 +62,8 @@ namespace DumpReflection.Reflection
                 Natives.TypeFlags.HasUnknownCallback38 |
                 Natives.TypeFlags.HasUnknownCallback30 |
                 Natives.TypeFlags.HasUnknownCallback28;
-            var unknownFlags = this.TypeFlags & ~knownFlags;
-            if (this.TypeFlags != Natives.TypeFlags.Everything &&
+            var unknownFlags = this.Flags & ~knownFlags;
+            if (this.Flags != Natives.TypeFlags.Everything &&
                 unknownFlags != Natives.TypeFlags.None)
             {
                 throw new InvalidOperationException();
@@ -78,6 +77,15 @@ namespace DumpReflection.Reflection
         {
             base.Resolve(typeMap);
             typeMap.TryGetValue(this._UnderlyingTypePointer, out this._UnderlyingType);
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            if (this.UnderlyingTypePointer != IntPtr.Zero)
+            {
+                writer.WritePropertyName("underlying_type");
+                writer.WriteValue(pointer2Id(this.UnderlyingTypePointer));
+            }
         }
     }
 }

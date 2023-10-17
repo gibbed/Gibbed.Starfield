@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class FunctionNameAttribute : BaseStringAttribute
     {
+        public FunctionNameAttribute(IType type) : base(type)
+        {
+        }
     }
 }

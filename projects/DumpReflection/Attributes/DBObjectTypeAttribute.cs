@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class DBObjectTypeAttribute : BaseStringAttribute
     {
+        public DBObjectTypeAttribute(IType type) : base(type)
+        {
+        }
     }
 }

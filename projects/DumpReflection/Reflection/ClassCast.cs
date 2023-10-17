@@ -21,6 +21,7 @@
  */
 
 using System;
+using Newtonsoft.Json;
 
 namespace DumpReflection.Reflection
 {
@@ -29,6 +30,27 @@ namespace DumpReflection.Reflection
         public IntPtr TypePointer { get; set; }
         public IType Type { get; set; }
         public long Offset { get; set; }
+
+        public void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WriteStartObject();
+
+            var oldFormatting = writer.Formatting;
+            writer.Formatting = Formatting.None;
+
+            writer.WritePropertyName("type");
+            writer.WriteValue(pointer2Id(this.TypePointer));
+
+            if (this.Offset != 0)
+            {
+                writer.WritePropertyName("offset");
+                writer.WriteValue(this.Offset);
+            }
+
+            writer.WriteEndObject();
+
+            writer.Formatting = oldFormatting;
+        }
 
         public override string ToString()
         {

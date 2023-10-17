@@ -24,7 +24,7 @@ namespace DumpReflection.Reflection
 {
     internal class UniquePointerType : ReferenceType
     {
-        public UniquePointerType() : base(Natives.TypeId.UniquePointer)
+        public UniquePointerType() : base(Natives.TypeKind.UniquePointer)
         {
         }
     }

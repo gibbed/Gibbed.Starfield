@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class IconPathAttribute : BaseStringAttribute
     {
+        public IconPathAttribute(IType type) : base(type)
+        {
+        }
     }
 }

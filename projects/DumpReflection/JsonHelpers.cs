@@ -20,19 +20,34 @@
  *    distribution.
  */
 
-namespace DumpReflection.Natives
+using System;
+using Newtonsoft.Json;
+
+namespace DumpReflection
 {
-    internal enum TypeId : byte
+    internal static class JsonHelpers
     {
-        Basic = 0, // BSReflection::BasicType
-        String = 1, // BSReflection::IStringType
-        Enumeration = 2, // BSReflection::EnumerationType
-        Class = 3, // BSReflection::ClassType
-        List = 4, // BSReflection::IListType
-        Set = 5, // BSReflection::ISetType
-        Map = 6, // BSReflection::IMapType
-        UniquePointer = 7, // BSReflection::IUniquePtrType
-        SharedPointer = 8, // BSReflection::ISharedPtrType
-        BorrowedPointer = 9, // BSReflection::IBorrowedPtrType
+        public static void WriteValueFlags<T>(this JsonWriter writer, T flags, params T[] ignoreValues)
+            where T : struct, Enum
+        {
+            var oldFormatting = writer.Formatting;
+            writer.Formatting = Formatting.None;
+            writer.WriteStartArray();
+            foreach (T value in Enum.GetValues(typeof(T)))
+            {
+                // TODO(gibbed): jank, but okay
+                if (Array.IndexOf(ignoreValues, value) >= 0)
+                {
+                    continue;
+                }
+                if (flags.HasFlag(value) == false)
+                {
+                    continue;
+                }
+                writer.WriteValue(Enum.GetName(typeof(T), value));
+            }
+            writer.WriteEndArray();
+            writer.Formatting = oldFormatting;
+        }
     }
 }

@@ -20,35 +20,14 @@
  *    distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
-using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
-    internal class DefaultTrackRequirementAttribute : BaseAttribute<DefaultTrackRequirementAttribute.Native>
+    internal class DefaultTrackRequirementAttribute : BaseTypePointerAttribute
     {
-        public IType DefaultTrackRequirement { get; set; }
-
-        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
+        public DefaultTrackRequirementAttribute(IType type) : base(type)
         {
-            this.DefaultTrackRequirement = typeMap[native.DefaultTrackRequirement];
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Native
-        {
-            public IntPtr DefaultTrackRequirement; // 0
-
-            static Native()
-            {
-                if (Marshal.SizeOf(typeof(Native)) != 0x8)
-                {
-                    throw new InvalidOperationException();
-                }
-            }
         }
     }
 }

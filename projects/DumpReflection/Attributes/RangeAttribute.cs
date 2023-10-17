@@ -24,12 +24,19 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal class RangeAttribute : BaseAttribute<RangeAttribute.Native>
     {
+        public RangeAttribute(IType type) : base(type)
+        {
+        }
+
+        public override bool CollapseJson => false;
+
         public double Minimum { get; set; }
         public double Maximum { get; set; }
         public double Step { get; set; }
@@ -48,6 +55,24 @@ namespace DumpReflection.Attributes
             {
                 //throw new InvalidOperationException();
             }
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("min");
+            writer.WriteValue(this.Minimum);
+
+            writer.WritePropertyName("max");
+            writer.WriteValue(this.Maximum);
+
+            writer.WritePropertyName("step");
+            writer.WriteValue(this.Step);
+
+            writer.WritePropertyName("__unknown18");
+            writer.WriteValue(this.Unknown18);
+
+            writer.WritePropertyName("__unknown1C");
+            writer.WriteValue(this.Unknown1C);
         }
 
         [StructLayout(LayoutKind.Sequential)]

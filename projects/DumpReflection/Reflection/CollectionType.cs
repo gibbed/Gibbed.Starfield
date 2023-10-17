@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Reflection
@@ -29,21 +30,19 @@ namespace DumpReflection.Reflection
     internal abstract class CollectionType : BaseType<Natives.BaseType>
     {
         #region Fields
-        private readonly Natives.TypeId _ExpectedTypeId;
+        private readonly Natives.TypeKind _ExpectedTypeId;
         private string _Name;
         private IntPtr _ItemTypePointer;
         private IType _ItemType;
         #endregion
 
-        protected CollectionType(Natives.TypeId expectedTypeId)
+        protected CollectionType(Natives.TypeKind expectedTypeId)
         {
             this._ExpectedTypeId = expectedTypeId;
         }
 
         #region Properties
-        public override string Name => this._Name == "std::map"
-            ? $"std::set<{this.ItemTypeName}>"
-            : $"{this._Name}<{this.ItemTypeName}>";
+        public override string Name => this._Name;
         public IntPtr ItemTypePointer => this._ItemTypePointer;
         public IType ItemType => this._ItemType;
         public string ItemTypeName => $"{this._ItemType?.Name ?? ("unknown:" + this._ItemTypePointer.ToString("X"))}";
@@ -53,7 +52,7 @@ namespace DumpReflection.Reflection
         {
             this.Read(nativePointer, native);
 
-            if (this.TypeId != _ExpectedTypeId)
+            if (this.Kind != _ExpectedTypeId)
             {
                 throw new InvalidOperationException();
             }
@@ -65,7 +64,7 @@ namespace DumpReflection.Reflection
                 Natives.TypeFlags.HasUnknownCallback28 |
                 Natives.TypeFlags.ClaimsToBeAStruct |
                 Natives.TypeFlags.IsStruct;
-            var unknownFlags = this.TypeFlags & ~knownFlags;
+            var unknownFlags = this.Flags & ~knownFlags;
             if (unknownFlags != Natives.TypeFlags.None)
             {
                 throw new InvalidOperationException();
@@ -79,6 +78,12 @@ namespace DumpReflection.Reflection
         {
             base.Resolve(typeMap);
             typeMap.TryGetValue(this._ItemTypePointer, out this._ItemType);
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("item_type");
+            writer.WriteValue(pointer2Id(this.ItemTypePointer));
         }
     }
 }

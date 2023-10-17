@@ -30,7 +30,7 @@ namespace DumpReflection.Natives
     {
         public IntPtr Name; // 00
         public IntPtr Type; // 08
-        public uint Offset; // 10
+        public int Offset; // 10
         public uint Unknown14; // 14
         public AttributeData AttributeData; // 18
 

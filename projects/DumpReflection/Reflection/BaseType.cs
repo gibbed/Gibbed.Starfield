@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Reflection
@@ -31,10 +32,10 @@ namespace DumpReflection.Reflection
         #region Fields
         private IntPtr _NativePointer;
         private IntPtr _VftablePointer;
-        private uint _TypeSize;
-        private ushort _TypeAlignment;
-        private Natives.TypeId _TypeId;
-        private Natives.TypeFlags _TypeFlags;
+        private uint _Size;
+        private ushort _Alignment;
+        private Natives.TypeKind _Kind;
+        private Natives.TypeFlags _Flags;
         private readonly List<Attributes.IAttribute> _Attributes;
         #endregion
 
@@ -46,10 +47,10 @@ namespace DumpReflection.Reflection
         #region Properties
         public IntPtr NativePointer => this._NativePointer;
         public IntPtr VftablePointer => this._VftablePointer;
-        public uint TypeSize => this._TypeSize;
-        public ushort TypeAlignment => this._TypeAlignment;
-        public Natives.TypeId TypeId => this._TypeId;
-        public Natives.TypeFlags TypeFlags => this._TypeFlags;
+        public uint Size => this._Size;
+        public ushort Alignment => this._Alignment;
+        public Natives.TypeKind Kind => this._Kind;
+        public Natives.TypeFlags Flags => this._Flags;
         public abstract string Name { get; }
         public List<Attributes.IAttribute> Attributes => this._Attributes;
         #endregion
@@ -64,10 +65,10 @@ namespace DumpReflection.Reflection
         {
             this._NativePointer = nativePointer;
             this._VftablePointer = native.Vftable;
-            this._TypeSize = native.TypeSize;
-            this._TypeAlignment = native.TypeAlignment;
-            this._TypeId = native.TypeId;
-            this._TypeFlags = native.TypeFlags;
+            this._Size = native.Size;
+            this._Alignment = native.Alignment;
+            this._Kind = native.Kind;
+            this._Flags = native.Flags;
         }
 
         protected abstract void Read(RuntimeProcess runtime, IntPtr nativePointer, TNative native);
@@ -76,9 +77,62 @@ namespace DumpReflection.Reflection
         {
         }
 
+        void IType.WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("name");
+            writer.WriteValue(this.Name);
+
+            if (this is CollectionType && this.Name == "std::map")
+            {
+                writer.WritePropertyName("name_is_liar");
+                writer.WriteValue(true);
+
+                writer.WritePropertyName("actual_name");
+                writer.WriteValue("std::set");
+            }
+
+            //writer.WritePropertyName("id");
+            //writer.WriteValue(pointer2Id(this.NativePointer));
+
+            writer.WritePropertyName("vftable");
+            writer.WriteValue(pointer2Id(this.VftablePointer));
+
+            writer.WritePropertyName("size");
+            writer.WriteValue(this.Size);
+
+            writer.WritePropertyName("alignment");
+            writer.WriteValue(this.Alignment);
+
+            writer.WritePropertyName("kind");
+            writer.WriteValue(this.Kind.ToString());
+
+            if (this is not BasicType &&
+                this is not EnumType &&
+                this.Flags != Natives.TypeFlags.None)
+            {
+                writer.WritePropertyName("flags");
+                writer.WriteValueFlags(this.Flags, Natives.TypeFlags.None, Natives.TypeFlags.Everything);
+            }
+
+            this.WriteJson(writer, pointer2Id);
+
+            if (this.Attributes.Count > 0)
+            {
+                writer.WritePropertyName("attributes");
+                writer.WriteStartArray();
+                foreach (var attribute in this.Attributes)
+                {
+                    attribute.WriteJson(writer, pointer2Id);
+                }
+                writer.WriteEndArray();
+            }
+        }
+
+        protected abstract void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id);
+
         public override string ToString()
         {
-            return $"{this.Name ?? base.ToString()} {this.TypeSize} {this.TypeAlignment}";
+            return $"{this.Name ?? base.ToString()} {this.Size} {this.Alignment}";
         }
     }
 }

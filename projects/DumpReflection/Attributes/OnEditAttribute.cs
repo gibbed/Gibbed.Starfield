@@ -20,10 +20,15 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class OnEditAttribute : BasePointerAttribute
     {
         // TODO(gibbed): callback function pointer
+        public OnEditAttribute(IType type) : base(type)
+        {
+        }
     }
 }

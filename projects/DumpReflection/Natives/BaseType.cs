@@ -29,10 +29,10 @@ namespace DumpReflection.Natives
     internal struct BaseType
     {
         public IntPtr Vftable; // 00
-        public uint TypeSize; // 08
-        public ushort TypeAlignment; // 0C
-        public TypeId TypeId; // 0E
-        public TypeFlags TypeFlags; // 0F
+        public uint Size; // 08
+        public ushort Alignment; // 0C
+        public TypeKind Kind; // 0E
+        public TypeFlags Flags; // 0F
 
         static BaseType()
         {

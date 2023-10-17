@@ -24,17 +24,28 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal class ResourceFileInfoAttribute : BaseAttribute<ResourceFileInfoAttribute.Native>
     {
+        public ResourceFileInfoAttribute(IType type) : base(type)
+        {
+        }
+
         public ushort Unknown { get; set; }
 
         protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
         {
             this.Unknown = native.Unknown;
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("__unknown");
+            writer.WriteValue(this.Unknown);
         }
 
         [StructLayout(LayoutKind.Sequential)]

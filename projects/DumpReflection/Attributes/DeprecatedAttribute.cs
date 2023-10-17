@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class DeprecatedAttribute : BaseEmptyAttribute
     {
+        public DeprecatedAttribute(IType type) : base(type)
+        {
+        }
     }
 }

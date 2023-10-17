@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Reflection
@@ -30,15 +31,16 @@ namespace DumpReflection.Reflection
     {
         public IntPtr NativePointer { get; }
         public IntPtr VftablePointer { get; }
-        public uint TypeSize { get; }
-        public ushort TypeAlignment { get; }
-        public Natives.TypeId TypeId { get; }
-        public Natives.TypeFlags TypeFlags { get; }
+        public uint Size { get; }
+        public ushort Alignment { get; }
+        public Natives.TypeKind Kind { get; }
+        public Natives.TypeFlags Flags { get; }
         public string Name { get; }
         public List<Attributes.IAttribute> Attributes { get; }
 
         public void Read(RuntimeProcess runtime, IntPtr nativePointer);
-
         public void Resolve(Dictionary<IntPtr, IType> typeMap);
+
+        void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id);
     }
 }

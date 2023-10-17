@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
@@ -30,14 +31,20 @@ namespace DumpReflection.Attributes
     internal abstract class BaseAttribute<TNative> : IAttribute
     {
         #region Fields
-        private string _NativeName;
+        private readonly IType _Type;
         private IntPtr _NativePointer;
         #endregion
 
+        protected BaseAttribute(IType type)
+        {
+            this._Type = type;
+        }
+
         #region Properties
-        public IntPtr NativePointer => this._NativePointer;
-        public string NativeName { get => this._NativeName; set => this._NativeName = value; }
+        public IType Type => this._Type;
         public Type NativeType => typeof(TNative);
+        public IntPtr NativePointer => this._NativePointer;
+        public virtual bool CollapseJson => true;
         #endregion
 
         public void Read(RuntimeProcess runtime, IntPtr nativePointer, Dictionary<IntPtr, IType> typeMap)
@@ -48,5 +55,27 @@ namespace DumpReflection.Attributes
         }
 
         protected abstract void Read(RuntimeProcess runtime, TNative native, Dictionary<IntPtr, IType> typeMap);
+
+        void IAttribute.WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WriteStartObject();
+
+            var oldFormatting = writer.Formatting;
+            if (this.CollapseJson == true)
+            {
+                writer.Formatting = Formatting.None;
+            }
+
+            writer.WritePropertyName("type");
+            writer.WriteValue(pointer2Id(this.Type.NativePointer));
+
+            this.WriteJson(writer, pointer2Id);
+
+            writer.WriteEndObject();
+
+            writer.Formatting = oldFormatting;
+        }
+
+        protected abstract void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id);
     }
 }

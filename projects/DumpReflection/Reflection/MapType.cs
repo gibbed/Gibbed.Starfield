@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Reflection
@@ -35,7 +36,7 @@ namespace DumpReflection.Reflection
         #endregion
 
         #region Properties
-        public override string Name => $"{this._Name}<{this.ItemTypeName}>";
+        public override string Name => this._Name;
         public IntPtr ItemTypePointer => this._ItemTypePointer;
         public IType ItemType => this._ItemType;
         public string ItemTypeName => $"{this._ItemType?.Name ?? ("unknown:" + this._ItemTypePointer.ToString("X"))}";
@@ -45,7 +46,7 @@ namespace DumpReflection.Reflection
         {
             this.Read(nativePointer, native);
 
-            if (this.TypeId != Natives.TypeId.Map)
+            if (this.Kind != Natives.TypeKind.Map)
             {
                 throw new InvalidOperationException();
             }
@@ -55,7 +56,7 @@ namespace DumpReflection.Reflection
                 Natives.TypeFlags.HasUnknownCallback38 |
                 Natives.TypeFlags.HasUnknownCallback30 |
                 Natives.TypeFlags.HasUnknownCallback28;
-            var unknownFlags = this.TypeFlags & ~knownFlags;
+            var unknownFlags = this.Flags & ~knownFlags;
             if (unknownFlags != Natives.TypeFlags.None)
             {
                 throw new InvalidOperationException();
@@ -69,6 +70,12 @@ namespace DumpReflection.Reflection
         {
             base.Resolve(typeMap);
             typeMap.TryGetValue(this._ItemTypePointer, out this._ItemType);
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("item_type");
+            writer.WriteValue(pointer2Id(this.ItemTypePointer));
         }
     }
 }

@@ -22,24 +22,71 @@
 
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace DumpReflection.Reflection
 {
     internal class ClassProperty
     {
+        #region Fields
         private readonly List<Attributes.IAttribute> _Attributes;
+        #endregion
 
         public ClassProperty()
         {
             this._Attributes = new();
         }
 
+        #region Properties
         public string Name { get; set; }
         public IntPtr TypePointer { get; set; }
         public IType Type { get; set; }
-        public long Offset { get; set; }
+        public int Offset { get; set; }
+        public uint Unknown { get; set; }
         public Natives.AttributeData AttributeData { get; set; }
         public List<Attributes.IAttribute> Attributes => this._Attributes;
+        #endregion
+
+        public void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WriteStartObject();
+
+            var oldFormatting = writer.Formatting;
+            if (this.Attributes.Count == 0)
+            {
+                writer.Formatting = Formatting.None;
+            }
+
+            writer.WritePropertyName("name");
+            writer.WriteValue(this.Name);
+
+            writer.WritePropertyName("type");
+            writer.WriteValue(pointer2Id(this.TypePointer));
+
+            writer.WritePropertyName("offset");
+            writer.WriteValue(this.Offset);
+
+            if (this.Unknown != 0)
+            {
+                writer.WritePropertyName("__unknown");
+                writer.WriteValue(this.Unknown);
+            }
+
+            if (this.Attributes.Count > 0)
+            {
+                writer.WritePropertyName("attributes");
+                writer.WriteStartArray();
+                foreach (var attribute in this.Attributes)
+                {
+                    attribute.WriteJson(writer, pointer2Id);
+                }
+                writer.WriteEndArray();
+            }
+
+            writer.WriteEndObject();
+
+            writer.Formatting = oldFormatting;
+        }
 
         public override string ToString()
         {

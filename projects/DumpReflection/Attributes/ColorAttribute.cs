@@ -24,12 +24,17 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal class ColorAttribute : BaseAttribute<ColorAttribute.Native>
     {
+        public ColorAttribute(IType type) : base(type)
+        {
+        }
+
         public byte R { get; set; }
         public byte G { get; set; }
         public byte B { get; set; }
@@ -46,6 +51,18 @@ namespace DumpReflection.Attributes
             this.R = (byte)native.R;
             this.G = (byte)native.G;
             this.B = (byte)native.B;
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("r");
+            writer.WriteValue(this.R);
+
+            writer.WritePropertyName("g");
+            writer.WriteValue(this.G);
+
+            writer.WritePropertyName("b");
+            writer.WriteValue(this.B);
         }
 
         [StructLayout(LayoutKind.Sequential)]

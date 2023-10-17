@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class VectorAxisAttribute : BaseStringAttribute
     {
+        public VectorAxisAttribute(IType type) : base(type)
+        {
+        }
     }
 }

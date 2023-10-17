@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Reflection
@@ -48,9 +49,15 @@ namespace DumpReflection.Reflection
 
         #region Properties
         public override string Name => this._Name;
+        public IntPtr UnknownCallback20 { get; set; }
+        public IntPtr UnknownCallback28 { get; set; }
+        public IntPtr UnknownCallback30 { get; set; }
+        public IntPtr UnknownCallback38 { get; set; }
         public List<ClassProperty> Properties => this._Properties;
         public List<ClassCast> Upcasts => this._Upcasts;
         public List<ClassCast> Downcasts => this._Downcasts;
+        public Natives.ClassFlags ClassFlags { get; set; }
+        public ushort Unknown8C { get; set; }
         #endregion
 
         protected override void Read(RuntimeProcess runtime, IntPtr nativePointer, Natives.ClassType native)
@@ -64,7 +71,7 @@ namespace DumpReflection.Reflection
                 throw new InvalidOperationException();
             }
 
-            if (this.TypeId != Natives.TypeId.Class)
+            if (this.Kind != Natives.TypeKind.Class)
             {
                 throw new InvalidOperationException();
             }
@@ -91,7 +98,7 @@ namespace DumpReflection.Reflection
                 expectedTypeFlags |= Natives.TypeFlags.ClaimsToBeAStruct;
             }
 
-            if ((native.Base.TypeFlags & ~Natives.TypeFlags.IsStruct) != expectedTypeFlags)
+            if ((native.Base.Flags & ~Natives.TypeFlags.IsStruct) != expectedTypeFlags)
             {
                 throw new InvalidOperationException();
             }
@@ -100,7 +107,7 @@ namespace DumpReflection.Reflection
                 Natives.ClassFlags.Unknown1 |
                 Natives.ClassFlags.Unknown2 |
                 Natives.ClassFlags.ClaimsToBeAStruct |
-                Natives.ClassFlags.Unknown4;
+                Natives.ClassFlags.NotDiffed;
             var unknownFlags = native.Flags & ~knownFlags;
             if (unknownFlags != Natives.ClassFlags.None)
             {
@@ -133,24 +140,23 @@ namespace DumpReflection.Reflection
             this._Downcasts.Clear();
             this._Downcasts.AddRange(downcasts);
 
-            if (native.Unknown8C != 0)
-            {
-
-            }
+            this.UnknownCallback20 = native.UnknownCallback20;
+            this.UnknownCallback28 = native.UnknownCallback28;
+            this.UnknownCallback30 = native.UnknownCallback30;
+            this.UnknownCallback38 = native.UnknownCallback38;
+            this.ClassFlags = native.Flags;
+            this.Unknown8C = native.Unknown8C;
         }
 
         private static ClassProperty ReadProperty(RuntimeProcess runtime, IntPtr nativePointer)
         {
             var native = runtime.ReadStructure<Natives.ClassProperty>(nativePointer);
 
-            if (native.Unknown14 != 0)
-            {
-            }
-
             ClassProperty instance = new();
             instance.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
             instance.TypePointer = native.Type;
             instance.Offset = native.Offset;
+            instance.Unknown = native.Unknown14;
             instance.AttributeData = native.AttributeData;
             return instance;
         }
@@ -203,6 +209,80 @@ namespace DumpReflection.Reflection
             {
                 property.Attributes.Clear();
                 property.Attributes.AddRange(Program.ReadAttributes(runtime, property.AttributeData, typeMap));
+            }
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            if (this.ClassFlags != Natives.ClassFlags.None)
+            {
+                writer.WritePropertyName("class_flags");
+                writer.WriteValueFlags(this.ClassFlags, Natives.ClassFlags.None);
+            }
+
+            if (this.UnknownCallback20 != IntPtr.Zero)
+            {
+                writer.WritePropertyName("__unknown20callback");
+                writer.WriteValue(pointer2Id(this.UnknownCallback20));
+            }
+
+            if (this.UnknownCallback28 != IntPtr.Zero)
+            {
+                writer.WritePropertyName("__unknown28callback");
+                writer.WriteValue(pointer2Id(this.UnknownCallback28));
+            }
+
+            if (this.UnknownCallback30 != IntPtr.Zero)
+            {
+                writer.WritePropertyName("__unknown30callback");
+                writer.WriteValue(pointer2Id(this.UnknownCallback30));
+            }
+
+            if (this.UnknownCallback38 != IntPtr.Zero)
+            {
+                writer.WritePropertyName("__unknown38callback");
+                writer.WriteValue(pointer2Id(this.UnknownCallback38));
+            }
+
+
+            if (this.Unknown8C != 0)
+            {
+                writer.WritePropertyName("__unknown8C");
+                writer.WriteValue(this.Unknown8C);
+            }
+
+            if (this.Properties.Count > 0)
+            {
+                writer.WritePropertyName("properties");
+                writer.WriteStartArray();
+                foreach (var property in this.Properties)
+                {
+                    property.WriteJson(writer, pointer2Id);
+                }
+                writer.WriteEndArray();
+            }
+
+            if (this.Upcasts.Count > 0)
+            {
+                writer.WritePropertyName("upcasts");
+                writer.WriteStartArray();
+                foreach (var cast in this.Upcasts)
+                {
+                    cast.WriteJson(writer, pointer2Id);
+                }
+                writer.WriteEndArray();
+            }
+
+            // TODO(gibbed): necessary? let people generate it from upcasts?
+            if (this.Downcasts.Count > 0)
+            {
+                writer.WritePropertyName("downcasts");
+                writer.WriteStartArray();
+                foreach (var cast in this.Downcasts)
+                {
+                    cast.WriteJson(writer, pointer2Id);
+                }
+                writer.WriteEndArray();
             }
         }
     }

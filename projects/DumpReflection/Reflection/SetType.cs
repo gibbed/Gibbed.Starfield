@@ -24,7 +24,7 @@ namespace DumpReflection.Reflection
 {
     internal class SetType : CollectionType
     {
-        public SetType() : base(Natives.TypeId.Set)
+        public SetType() : base(Natives.TypeKind.Set)
         {
         }
     }

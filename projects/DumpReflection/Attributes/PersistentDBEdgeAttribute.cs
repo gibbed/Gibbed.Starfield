@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class PersistentDBEdgeAttribute : BaseEmptyAttribute
     {
+        public PersistentDBEdgeAttribute(IType type) : base(type)
+        {
+        }
     }
 }

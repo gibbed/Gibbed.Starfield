@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class UniqueAttribute : BaseEmptyAttribute
     {
+        public UniqueAttribute(IType type) : base(type)
+        {
+        }
     }
 }

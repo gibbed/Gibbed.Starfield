@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class CategoryAttribute : BaseStringAttribute
     {
+        public CategoryAttribute(IType type) : base(type)
+        {
+        }
     }
 }

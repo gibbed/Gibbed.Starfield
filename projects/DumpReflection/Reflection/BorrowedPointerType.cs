@@ -24,7 +24,7 @@ namespace DumpReflection.Reflection
 {
     internal class BorrowedPointerType : ReferenceType
     {
-        public BorrowedPointerType() : base(Natives.TypeId.BorrowedPointer)
+        public BorrowedPointerType() : base(Natives.TypeKind.BorrowedPointer)
         {
         }
     }

@@ -24,14 +24,21 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal class TrackRequirementAttribute : BaseAttribute<TrackRequirementAttribute.Native>
     {
+        public TrackRequirementAttribute(IType type) : base(type)
+        {
+        }
+
+        public override bool CollapseJson => false;
+
         public IType Unknown0 { get; set; }
-        public IntPtr Unknown8 { get; set; }
+        public ulong Unknown8 { get; set; }
 
         protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
         {
@@ -39,11 +46,20 @@ namespace DumpReflection.Attributes
             this.Unknown8 = native.Unknown8;
         }
 
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("__unknown0");
+            writer.WriteValue(pointer2Id(this.Unknown0.NativePointer));
+
+            writer.WritePropertyName("__unknown8");
+            writer.WriteValue(this.Unknown8);
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         internal struct Native
         {
             public IntPtr Unknown0; // 0
-            public IntPtr Unknown8; // 8
+            public ulong Unknown8; // 8
 
             static Native()
             {

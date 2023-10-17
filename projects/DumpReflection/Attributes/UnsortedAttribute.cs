@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class UnsortedAttribute : BaseEmptyAttribute
     {
+        public UnsortedAttribute(IType type) : base(type)
+        {
+        }
     }
 }

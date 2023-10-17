@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class AliasAttribute : BaseStringAttribute
     {
+        public AliasAttribute(IType type) : base(type)
+        {
+        }
     }
 }

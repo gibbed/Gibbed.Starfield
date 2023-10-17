@@ -29,13 +29,13 @@ using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
-    internal class FormTypeAttribute : BaseAttribute<FormTypeAttribute.Native>
+    internal abstract class BaseULongAttribute : BaseAttribute<BaseULongAttribute.Native>
     {
-        public FormTypeAttribute(IType type) : base(type)
+        protected BaseULongAttribute(IType type) : base(type)
         {
         }
 
-        public byte Value { get; set; }
+        public ulong Value { get; set; }
 
         protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
         {
@@ -45,17 +45,17 @@ namespace DumpReflection.Attributes
         protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
         {
             writer.WritePropertyName("value");
-            writer.WriteValue(Gibbed.Starfield.PluginFormats.FormTypes.GetTypeFromIndex(this.Value).ToString());
+            writer.WriteValue(this.Value);
         }
 
         [StructLayout(LayoutKind.Sequential)]
         internal struct Native
         {
-            public byte Value; // 0
+            public ulong Value; // 0
 
             static Native()
             {
-                if (Marshal.SizeOf(typeof(Native)) != 0x1)
+                if (Marshal.SizeOf(typeof(Native)) != 0x8)
                 {
                     throw new InvalidOperationException();
                 }

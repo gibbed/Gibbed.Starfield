@@ -20,14 +20,19 @@
  *    distribution.
  */
 
-using DumpReflection.Reflection;
-
-namespace DumpReflection.Attributes
+namespace DumpReflection.Natives
 {
-    internal class MaterialTextureSelectionWidgetSetupAttribute : BaseByteAttribute
+    internal enum TypeKind : byte
     {
-        public MaterialTextureSelectionWidgetSetupAttribute(IType type) : base(type)
-        {
-        }
+        Basic = 0, // BSReflection::BasicType
+        String = 1, // BSReflection::IStringType
+        Enumeration = 2, // BSReflection::EnumerationType
+        Class = 3, // BSReflection::ClassType
+        List = 4, // BSReflection::IListType
+        Set = 5, // BSReflection::ISetType
+        Map = 6, // BSReflection::IMapType
+        UniquePointer = 7, // BSReflection::IUniquePtrType
+        SharedPointer = 8, // BSReflection::ISharedPtrType
+        BorrowedPointer = 9, // BSReflection::IBorrowedPtrType
     }
 }

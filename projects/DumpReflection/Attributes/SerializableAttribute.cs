@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class SerializableAttribute : BaseUIntAttribute
     {
+        public SerializableAttribute(IType type) : base(type)
+        {
+        }
     }
 }

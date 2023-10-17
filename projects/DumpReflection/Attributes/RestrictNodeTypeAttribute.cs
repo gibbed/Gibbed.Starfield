@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class RestrictNodeTypeAttribute : BaseByteAttribute
     {
+        public RestrictNodeTypeAttribute(IType type) : base(type)
+        {
+        }
     }
 }

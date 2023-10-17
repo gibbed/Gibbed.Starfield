@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class TransientAttribute : BaseEmptyAttribute
     {
+        public TransientAttribute(IType type) : base(type)
+        {
+        }
     }
 }

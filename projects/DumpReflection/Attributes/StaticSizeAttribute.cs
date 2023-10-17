@@ -20,35 +20,14 @@
  *    distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
-using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
-    internal class StaticSizeAttribute : BaseAttribute<StaticSizeAttribute.Native>
+    internal class StaticSizeAttribute : BaseULongAttribute
     {
-        public ulong Unknown { get; set; }
-
-        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
+        public StaticSizeAttribute(IType type) : base(type)
         {
-            this.Unknown = native.Unknown;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Native
-        {
-            public ulong Unknown; // 0
-
-            static Native()
-            {
-                if (Marshal.SizeOf(typeof(Native)) != 0x8)
-                {
-                    throw new InvalidOperationException();
-                }
-            }
         }
     }
 }

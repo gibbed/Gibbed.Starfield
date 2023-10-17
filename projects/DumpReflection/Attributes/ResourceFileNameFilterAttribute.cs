@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class ResourceFileNameFilterAttribute : BaseStringAttribute
     {
+        public ResourceFileNameFilterAttribute(IType type) : base(type)
+        {
+        }
     }
 }

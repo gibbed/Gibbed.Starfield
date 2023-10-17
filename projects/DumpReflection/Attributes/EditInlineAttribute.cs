@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class EditInlineAttribute : BaseEmptyAttribute
     {
+        public EditInlineAttribute(IType type) : base(type)
+        {
+        }
     }
 }

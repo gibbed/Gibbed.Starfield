@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class HideChildItemsAttribute : BaseEmptyAttribute
     {
+        public HideChildItemsAttribute(IType type) : base(type)
+        {
+        }
     }
 }

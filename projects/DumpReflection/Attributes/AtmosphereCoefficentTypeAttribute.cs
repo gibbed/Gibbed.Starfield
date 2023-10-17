@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class AtmosphereCoefficentTypeAttribute : BaseUIntAttribute
     {
+        public AtmosphereCoefficentTypeAttribute(IType type) : base(type)
+        {
+        }
     }
 }

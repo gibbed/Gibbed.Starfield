@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class ComponentAttribute : BaseEmptyAttribute
     {
+        public ComponentAttribute(IType type) : base(type)
+        {
+        }
     }
 }

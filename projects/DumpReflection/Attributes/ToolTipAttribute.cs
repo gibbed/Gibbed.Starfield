@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class ToolTipAttribute : BaseStringAttribute
     {
+        public ToolTipAttribute(IType type) : base(type)
+        {
+        }
     }
 }

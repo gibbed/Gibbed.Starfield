@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class ReadOnlyAttribute : BaseEmptyAttribute
     {
+        public ReadOnlyAttribute(IType type) : base(type)
+        {
+        }
     }
 }

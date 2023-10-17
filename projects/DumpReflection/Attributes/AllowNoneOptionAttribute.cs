@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class AllowNoneOptionAttribute : BaseEmptyAttribute
     {
+        public AllowNoneOptionAttribute(IType type) : base(type)
+        {
+        }
     }
 }

@@ -20,10 +20,16 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class BindingFilterFunctionAttribute : BasePointerAttribute
     {
         // TODO(gibbed): callback function pointer
+
+        public BindingFilterFunctionAttribute(IType type) : base(type)
+        {
+        }
     }
 }

@@ -22,6 +22,7 @@
 
 using System;
 using System.Text;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Reflection
@@ -34,18 +35,12 @@ namespace DumpReflection.Reflection
         private string _Name;
         private byte _Id;
         private bool _IsSigned;
-        private byte _Unknown1A;
-        private byte _Unknown1B;
-        private uint _Unknown1C;
         #endregion
 
         #region Properties
         public override string Name => this._Name;
         public byte Id => this._Id;
         public bool IsSigned => this._IsSigned;
-        public byte Unknown1A => this._Unknown1A;
-        public byte Unknown1B => this._Unknown1B;
-        public uint Unknown1C => this._Unknown1C;
         #endregion
 
         protected override void Read(RuntimeProcess runtime, IntPtr nativePointer, Natives.BasicType native)
@@ -57,12 +52,12 @@ namespace DumpReflection.Reflection
                 throw new InvalidOperationException();
             }
 
-            if (this.TypeId != Natives.TypeId.Basic)
+            if (this.Kind != Natives.TypeKind.Basic)
             {
                 throw new InvalidOperationException();
             }
 
-            if (this.TypeFlags != Natives.TypeFlags.Everything)
+            if (this.Flags != Natives.TypeFlags.Everything)
             {
                 throw new InvalidOperationException();
             }
@@ -70,9 +65,15 @@ namespace DumpReflection.Reflection
             this._Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
             this._Id = native.Id;
             this._IsSigned = native.IsSigned;
-            this._Unknown1A = native.Unknown1A;
-            this._Unknown1B = native.Unknown1B;
-            this._Unknown1C = native.Unknown1C;
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("id");
+            writer.WriteValue(this.Id);
+
+            writer.WritePropertyName("is_signed");
+            writer.WriteValue(this.IsSigned);
         }
     }
 }

@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class FormReferenceAttribute : BaseStringAttribute
     {
+        public FormReferenceAttribute(IType type) : base(type)
+        {
+        }
     }
 }

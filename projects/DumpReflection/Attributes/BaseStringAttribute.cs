@@ -25,17 +25,28 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal class BaseStringAttribute : BaseAttribute<BaseStringAttribute.Native>
     {
+        protected BaseStringAttribute(IType type) : base(type)
+        {
+        }
+
         public string Value { get; set; }
 
         protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
         {
             this.Value = runtime.ReadStringZ(native.Value, Encoding.ASCII);
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("value");
+            writer.WriteValue(this.Value);
         }
 
         [StructLayout(LayoutKind.Sequential)]

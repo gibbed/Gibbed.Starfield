@@ -20,35 +20,14 @@
  *    distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
-using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
-    internal class CorrespondingTypeAttribute : BaseAttribute<CorrespondingTypeAttribute.Native>
+    internal class CorrespondingTypeAttribute : BaseTypePointerAttribute
     {
-        public IType CorrespondingType { get; set; }
-
-        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
+        public CorrespondingTypeAttribute(IType type) : base(type)
         {
-            this.CorrespondingType = typeMap[native.CorrespondingType];
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Native
-        {
-            public IntPtr CorrespondingType; // 0
-
-            static Native()
-            {
-                if (Marshal.SizeOf(typeof(Native)) != 0x8)
-                {
-                    throw new InvalidOperationException();
-                }
-            }
         }
     }
 }

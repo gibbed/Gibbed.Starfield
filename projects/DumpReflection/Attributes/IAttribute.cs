@@ -23,15 +23,19 @@
 using System;
 using System.Collections.Generic;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal interface IAttribute
     {
-        string NativeName { get; set; }
+        IType Type { get; }
+
         Type NativeType { get; }
 
         void Read(RuntimeProcess runtime, IntPtr nativePointer, Dictionary<IntPtr, IType> typeMap);
+
+        void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id);
     }
 }

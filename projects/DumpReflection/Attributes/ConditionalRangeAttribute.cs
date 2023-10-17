@@ -25,12 +25,20 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal class ConditionalRangeAttribute : BaseAttribute<ConditionalRangeAttribute.Native>
     {
+        public ConditionalRangeAttribute(IType type)
+            : base(type)
+        {
+        }
+
+        public override bool CollapseJson => false;
+
         public string Unknown00 { get; set; }
 
         public string Unknown10 { get; set; }
@@ -40,6 +48,11 @@ namespace DumpReflection.Attributes
             this.Unknown00 = runtime.ReadStringZ(native.Unknown00, Encoding.ASCII);
 
             this.Unknown10 = runtime.ReadStringZ(native.Unknown10, Encoding.ASCII);
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            // TODO(gibbed): fill this in!
         }
 
         [StructLayout(LayoutKind.Sequential)]

@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class NullableAttribute : BaseEmptyAttribute
     {
+        public NullableAttribute(IType type) : base(type)
+        {
+        }
     }
 }

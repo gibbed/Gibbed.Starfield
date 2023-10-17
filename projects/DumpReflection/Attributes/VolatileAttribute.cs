@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class VolatileAttribute : BaseEmptyAttribute
     {
+        public VolatileAttribute(IType type) : base(type)
+        {
+        }
     }
 }

@@ -24,12 +24,19 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal class HiddenAttribute : BaseAttribute<HiddenAttribute.Native>
     {
+        public HiddenAttribute(IType type) : base(type)
+        {
+        }
+
+        public override bool CollapseJson => false;
+
         public IntPtr Unknown00 { get; set; }
         public IntPtr Unknown08 { get; set; }
         public IntPtr Unknown10 { get; set; }
@@ -39,6 +46,10 @@ namespace DumpReflection.Attributes
             this.Unknown00 = native.Unknown00;
             this.Unknown08 = native.Unknown08;
             this.Unknown10 = native.Unknown10;
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
         }
 
         [StructLayout(LayoutKind.Sequential)]

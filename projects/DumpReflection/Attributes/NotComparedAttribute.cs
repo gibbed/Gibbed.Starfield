@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class NotComparedAttribute : BaseByteAttribute
     {
+        public NotComparedAttribute(IType type) : base(type)
+        {
+        }
     }
 }

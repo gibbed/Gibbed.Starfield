@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Reflection
@@ -32,16 +33,20 @@ namespace DumpReflection.Reflection
     {
         public static IntPtr ExpectedVftablePointer;
 
+        #region Fields
         private string _Name;
         private readonly List<EnumMember> _Members;
+        #endregion
 
         public EnumType()
         {
             this._Members = new();
         }
 
+        #region Properties
         public override string Name => this._Name;
         public List<EnumMember> Members => this._Members;
+        #endregion
 
         protected override void Read(RuntimeProcess runtime, IntPtr nativePointer, Natives.EnumType native)
         {
@@ -52,12 +57,12 @@ namespace DumpReflection.Reflection
                 throw new InvalidOperationException();
             }
 
-            if (this.TypeId != Natives.TypeId.Enumeration)
+            if (this.Kind != Natives.TypeKind.Enumeration)
             {
                 throw new InvalidOperationException();
             }
 
-            if (this.TypeFlags != Natives.TypeFlags.Everything)
+            if (this.Flags != Natives.TypeFlags.Everything)
             {
                 throw new InvalidOperationException();
             }
@@ -85,6 +90,20 @@ namespace DumpReflection.Reflection
             instance.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
             instance.Value = native.Value;
             return instance;
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            if (this.Members.Count > 0)
+            {
+                writer.WritePropertyName("members");
+                writer.WriteStartArray();
+                foreach (var member in this.Members)
+                {
+                    member.WriteJson(writer, pointer2Id);
+                }
+                writer.WriteEndArray();
+            }
         }
     }
 }

@@ -25,12 +25,19 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal class EditWidgetAttribute : BaseAttribute<EditWidgetAttribute.Native>
     {
+        public EditWidgetAttribute(IType type) : base(type)
+        {
+        }
+
+        public override bool CollapseJson => false;
+
         public string Name { get; set; }
         public ulong Unknown { get; set; }
 
@@ -38,6 +45,15 @@ namespace DumpReflection.Attributes
         {
             this.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
             this.Unknown = native.Unknown;
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("name");
+            writer.WriteValue(this.Name);
+
+            writer.WritePropertyName("__unknown");
+            writer.WriteValue(this.Unknown);
         }
 
         [StructLayout(LayoutKind.Sequential)]

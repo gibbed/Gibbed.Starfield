@@ -25,28 +25,66 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using DumpReflection.Reflection;
 using Gibbed.AddressLibrary;
 using Gibbed.IO;
+using NDesk.Options;
+using Newtonsoft.Json;
 using StarfieldDumping;
-using IndentedTextWriter = System.CodeDom.Compiler.IndentedTextWriter;
-using TypeId = DumpReflection.Natives.TypeId;
+using TypeKind = DumpReflection.Natives.TypeKind;
 
 namespace DumpReflection
 {
     internal static class Program
     {
+        private static string GetExecutableName()
+        {
+            return Path.GetFileName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase);
+        }
+
         public static void Main(string[] args)
         {
-            Environment.ExitCode = DumpingHelpers.Main(args, Dump);
+            bool showHelp = false;
+
+            OptionSet options = new()
+            {
+                { "h|help", "show this message and exit", v => showHelp = v != null },
+            };
+
+            List<string> extras;
+            try
+            {
+                extras = options.Parse(args);
+            }
+            catch (OptionException e)
+            {
+                Console.Write("{0}: ", GetExecutableName());
+                Console.WriteLine(e.Message);
+                Console.WriteLine("Try `{0} --help' for more information.", GetExecutableName());
+                return;
+            }
+
+            if (extras.Count < 0 || extras.Count > 1 || showHelp == true)
+            {
+                Console.WriteLine("Usage: {0} [OPTIONS]+ [output_json]", GetExecutableName());
+                Console.WriteLine();
+                Console.WriteLine("Options:");
+                options.WriteOptionDescriptions(Console.Out);
+                return;
+            }
+
+            var outputPath = extras.Count > 0
+                ? extras[0]
+                : "BSReflection.json";
+
+            Environment.ExitCode = DumpingHelpers.Main(outputPath, Dump);
             if (System.Diagnostics.Debugger.IsAttached == false)
             {
                 Console.ReadLine();
             }
         }
 
-        private static int Dump(RuntimeProcess runtime, AddressLibrary addressLibrary, string[] args)
+        private static int Dump(RuntimeProcess runtime, AddressLibrary addressLibrary, string outputPath)
         {
             var mainModuleBaseAddressValue = runtime.Process.MainModule.BaseAddress.ToInt64();
             IntPtr Id2Pointer(ulong id)
@@ -59,11 +97,20 @@ namespace DumpReflection
             ClassType.ExpectedVftablePointer = Id2Pointer(285167);
             EnumType.ExpectedVftablePointer = Id2Pointer(292531);
 
-            var baseTypeTypeOffset = Marshal.OffsetOf<Natives.BaseType>(nameof(Natives.BaseType.TypeId)).ToInt32();
+            var baseTypeKindOffset = Marshal.OffsetOf<Natives.BaseType>(nameof(Natives.BaseType.Kind)).ToInt32();
             var classNextOffset = Marshal.OffsetOf<Natives.ClassType>(nameof(Natives.ClassType.Next)).ToInt32();
             var enumNextOffset = Marshal.OffsetOf<Natives.EnumType>(nameof(Natives.EnumType.Next)).ToInt32();
 
             Queue<IntPtr> queue = new();
+
+            // basic types
+            var basicTypeTablePointer = Id2Pointer(885824);
+            var basicTypeTableEntryPointer = basicTypeTablePointer;
+            for (int i = 0; i < 11; i++, basicTypeTableEntryPointer += 8)
+            {
+                var typePointer = runtime.ReadPointer(basicTypeTableEntryPointer);
+                queue.Enqueue(typePointer);
+            }
 
             // class types
             foreach (var typePointer in ReadTypeList(runtime, Id2Pointer(885835), classNextOffset))
@@ -94,20 +141,20 @@ namespace DumpReflection
                     continue;
                 }
 
-                var nativeTypeType = (TypeId)runtime.ReadValueU8(nativePointer + baseTypeTypeOffset);
+                var nativeTypeKind = (TypeKind)runtime.ReadValueU8(nativePointer + baseTypeKindOffset);
 
-                IType instance = nativeTypeType switch
+                IType instance = nativeTypeKind switch
                 {
-                    TypeId.Basic => new BasicType(),
-                    TypeId.String => new StringType(),
-                    TypeId.Enumeration => new EnumType(),
-                    TypeId.Class => new ClassType(),
-                    TypeId.List => new ListType(),
-                    TypeId.Set => new SetType(),
-                    TypeId.Map => new MapType(),
-                    TypeId.UniquePointer => new UniquePointerType(),
-                    TypeId.SharedPointer => new SharedPointerType(),
-                    TypeId.BorrowedPointer => new BorrowedPointerType(),
+                    TypeKind.Basic => new BasicType(),
+                    TypeKind.String => new StringType(),
+                    TypeKind.Enumeration => new EnumType(),
+                    TypeKind.Class => new ClassType(),
+                    TypeKind.List => new ListType(),
+                    TypeKind.Set => new SetType(),
+                    TypeKind.Map => new MapType(),
+                    TypeKind.UniquePointer => new UniquePointerType(),
+                    TypeKind.SharedPointer => new SharedPointerType(),
+                    TypeKind.BorrowedPointer => new BorrowedPointerType(),
                     _ => throw new NotSupportedException(),
                 };
 
@@ -176,94 +223,85 @@ namespace DumpReflection
                 instance.ReadPropertyAttributes(runtime, typeMap);
             }
 
-
-            // TODO(gibbed): JSON output
-            // TODO(gibbed): C# output
-
-            StringBuilder sb = new();
-            using StringWriter stringWriter = new(sb);
-            using IndentedTextWriter writer = new(stringWriter, "  ");
-
-            foreach (var instance in typeMap.Values.OfType<ClassType>())
+            var addressLibraryPointer2Id = addressLibrary.Invert();
+            ulong Pointer2Id(IntPtr pointer)
             {
-                WriteAttributes(writer, instance.Attributes);
-                writer.WriteLine($"class {instance.Name}");
-                writer.WriteLine("{");
-                foreach (var property in instance.Properties)
-                {
-                    writer.Indent++;
-                    WriteAttributes(writer, property.Attributes);
-                    writer.WriteLine($"public {property.Type.Name} {property.Name}; // @{property.Offset:X}");
-                    writer.Indent--;
-                }
-                writer.WriteLine("}");
-                writer.WriteLine();
+                var offset = (ulong)(pointer.ToInt64() - mainModuleBaseAddressValue);
+                return addressLibraryPointer2Id[offset];
             }
 
-            foreach (var instance in typeMap.Values.OfType<EnumType>())
+            string output;
+            using (var stringWriter = new StringWriter())
+            using (var writer = new JsonTextWriter(stringWriter))
             {
-                WriteAttributes(writer, instance.Attributes);
-                writer.WriteLine($"enum {instance.Name}");
-                writer.WriteLine("{");
-                foreach (var member in instance.Members)
+                writer.Formatting = Formatting.Indented;
+                writer.Indentation = 2;
+                writer.IndentChar = ' ';
+
+                writer.WriteStartObject();
+
+                writer.WritePropertyName("generated_from");
+                writer.WriteStartObject();
+
+                writer.WritePropertyName("file_name");
+                writer.WriteValue(addressLibrary.FileName);
+
+                writer.WritePropertyName("version");
+                writer.WriteValue(addressLibrary.FileVersion.ToString());
+
+                writer.WriteEndObject();
+
+                writer.WritePropertyName("types");
+                writer.WriteStartObject();
+                foreach (var type in typeMap.Values
+                    .OrderBy(v => GetSort(v.Kind))
+                    .ThenBy(v => GetSort(v))
+                    .ThenBy(v => v.Name)
+                    .ThenBy(v => Pointer2Id(v.NativePointer)))
                 {
-                    writer.Indent++;
-                    WriteAttributes(writer, member.Attributes);
-                    writer.WriteLine($"{member.Name} = {member.Value},");
-                    writer.Indent--;
+                    writer.WritePropertyName($"{Pointer2Id(type.NativePointer)}");
+                    writer.WriteStartObject();
+                    type.WriteJson(writer, Pointer2Id);
+                    writer.WriteEndObject();
                 }
-                writer.WriteLine("}");
-                writer.WriteLine();
+                writer.WriteEndObject();
+
+                writer.WriteEndObject();
+
+                writer.Flush();
+                stringWriter.Flush();
+
+                output = stringWriter.ToString();
             }
 
-            writer.Flush();
-            stringWriter.Flush();
-
-            File.WriteAllText("reflection_dump.cs", sb.ToString());
+            File.WriteAllText(outputPath, output);
             return 0;
         }
 
-        private static void WriteAttributes(IndentedTextWriter writer, List<Attributes.IAttribute> attributes)
+        private static int GetSort(IType type)
         {
-            foreach (var attribute in attributes)
+            if (type is BasicType basicType)
             {
-                writer.Write($"[{attribute.NativeName}");
-                if (attribute is Attributes.BaseEmptyAttribute)
-                {
-                }
-                else if (attribute is Attributes.BaseByteAttribute byteAttribute)
-                {
-                    writer.Write($"(0x{byteAttribute.Value:X})");
-                }
-                else if (attribute is Attributes.BaseUIntAttribute uintAttribute)
-                {
-                    writer.Write($"(0x{uintAttribute.Value:X})");
-                }
-                else if (attribute is Attributes.BaseStringAttribute stringAttribute)
-                {
-                    var value = stringAttribute.Value;
-                    value = value.Replace("\\", "\\\\");
-                    value = value.Replace("\n", "\\n");
-                    value = value.Replace("\r", "\\r");
-                    value = value.Replace("\"", "\\\"");
-                    value = value.Replace("\"", "\\\"");
-                    writer.Write($"(\"{value}\")");
-                }
-                else if (attribute is Attributes.BasePointerAttribute pointerAttribute)
-                {
-                    writer.Write($"(0x{pointerAttribute.Value.ToInt64():X})");
-                }
-                else if (attribute is Attributes.AttributeAttribute attributeAttribute)
-                {
-                    writer.Write($"(Usage = {attributeAttribute.Usage})");
-                }
-                else
-                {
-                    writer.Write($"(?)");
-                }
-                writer.WriteLine($"]");
+                return basicType.Id;
             }
+
+            return 0;
         }
+
+        private static int GetSort(TypeKind kind) => kind switch
+        {
+            TypeKind.Basic => 0,
+            TypeKind.String => 1,
+            TypeKind.Enumeration => 3,
+            TypeKind.Class => 2,
+            TypeKind.List => 4,
+            TypeKind.Set => 5,
+            TypeKind.Map => 6,
+            TypeKind.UniquePointer => 7,
+            TypeKind.SharedPointer => 8,
+            TypeKind.BorrowedPointer => 9,
+            _ => throw new NotImplementedException(),
+        };
 
         private static void ReadAttributes(RuntimeProcess runtime, IntPtr nativePointer, Dictionary<IntPtr, IType> typeMap, Func<IntPtr, List<Attributes.IAttribute>> getAttributesForPointer)
         {
@@ -323,11 +361,10 @@ namespace DumpReflection
         private static Attributes.IAttribute ReadAttribute(RuntimeProcess runtime, IntPtr nativePointer, Natives.Attribute native, Dictionary<IntPtr, IType> typeMap)
         {
             var type = typeMap[native.Type];
-            IntPtr dataPointer = nativePointer - ((int)type.TypeSize).Align(8);
-            var attribute = AttributeFactory.Create(type.Name);
-            attribute.NativeName = type.Name;
+            IntPtr dataPointer = nativePointer - ((int)type.Size).Align(8);
+            var attribute = AttributeFactory.Create(type);
             var size = Marshal.SizeOf(attribute.NativeType);
-            if (size != type.TypeSize)
+            if (size != type.Size)
             {
                 throw new InvalidOperationException();
             }

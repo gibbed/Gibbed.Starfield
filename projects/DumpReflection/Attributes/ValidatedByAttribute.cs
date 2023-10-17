@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class ValidatedByAttribute : BaseStringAttribute
     {
+        public ValidatedByAttribute(IType type) : base(type)
+        {
+        }
     }
 }

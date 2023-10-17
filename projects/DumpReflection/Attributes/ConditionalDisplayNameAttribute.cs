@@ -25,14 +25,21 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal class ConditionalDisplayNameAttribute : BaseAttribute<ConditionalDisplayNameAttribute.Native>
     {
+        public ConditionalDisplayNameAttribute(IType type) : base(type)
+        {
+        }
+
+        public override bool CollapseJson => false;
+
         public string Unknown00 { get; set; }
-        public IntPtr Unknown08 { get; set; }
+        public ulong Unknown08 { get; set; }
         public string Unknown10 { get; set; }
         public string Unknown18 { get; set; }
 
@@ -44,11 +51,26 @@ namespace DumpReflection.Attributes
             this.Unknown18 = runtime.ReadStringZ(native.Unknown18, Encoding.ASCII);
         }
 
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            writer.WritePropertyName("__unknown00");
+            writer.WriteValue(this.Unknown00);
+
+            writer.WritePropertyName("__unknown08");
+            writer.WriteValue(this.Unknown08);
+
+            writer.WritePropertyName("__unknown10");
+            writer.WriteValue(this.Unknown10);
+
+            writer.WritePropertyName("__unknown18");
+            writer.WriteValue(this.Unknown18);
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         internal struct Native
         {
             public IntPtr Unknown00; // 0
-            public IntPtr Unknown08; // 0
+            public ulong Unknown08; // 0
             public IntPtr Unknown10; // 0
             public IntPtr Unknown18; // 0
 

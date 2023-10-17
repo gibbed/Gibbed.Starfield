@@ -24,7 +24,7 @@ namespace DumpReflection.Reflection
 {
     internal class ListType : CollectionType
     {
-        public ListType() : base(Natives.TypeId.List)
+        public ListType() : base(Natives.TypeKind.List)
         {
         }
     }

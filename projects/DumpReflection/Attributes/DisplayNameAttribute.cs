@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class DisplayNameAttribute : BaseStringAttribute
     {
+        public DisplayNameAttribute(IType type) : base(type)
+        {
+        }
     }
 }

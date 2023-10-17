@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
-    internal class LiveEditableAttribute : BaseEmptyAttribute    
+    internal class LiveEditableAttribute : BaseEmptyAttribute
     {
+        public LiveEditableAttribute(IType type) : base(type)
+        {
+        }
     }
 }

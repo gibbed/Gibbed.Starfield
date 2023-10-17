@@ -20,9 +20,14 @@
  *    distribution.
  */
 
+using DumpReflection.Reflection;
+
 namespace DumpReflection.Attributes
 {
     internal class BindingResourceAttribute : BaseStringAttribute
     {
+        public BindingResourceAttribute(IType type) : base(type)
+        {
+        }
     }
 }

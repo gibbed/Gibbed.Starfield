@@ -27,12 +27,15 @@ namespace DumpReflection.Attributes
     {
         None = 0,
 
+        Unknown0 = 1 << 0,
         Class = 1 << 1,
         Property = 1 << 2,
         Enum = 1 << 3,
         EnumConstant = 1 << 4,
         ReleaseFinal = 1 << 5,
-        
+        Unknown6 = 1 << 6,
+        Unknown7 = 1 << 7,
+
         ClassAndProperty = Class | Property,
         Type = Class | Property | Enum,
         

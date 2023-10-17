@@ -24,14 +24,26 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
+using Newtonsoft.Json;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
     internal class MaterialBindingAttribute : BaseAttribute<MaterialBindingAttribute.Native>
     {
+        public MaterialBindingAttribute(IType type) : base(type)
+        {
+        }
+
+        public override bool CollapseJson => false;
+
         protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
         {
+        }
+
+        protected override void WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
+        {
+            // TODO(gibbed): fill this out!
         }
 
         [StructLayout(LayoutKind.Sequential)]

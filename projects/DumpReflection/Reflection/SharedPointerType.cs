@@ -24,7 +24,7 @@ namespace DumpReflection.Reflection
 {
     internal class SharedPointerType : ReferenceType
     {
-        public SharedPointerType() : base(Natives.TypeId.SharedPointer)
+        public SharedPointerType() : base(Natives.TypeKind.SharedPointer)
         {
         }
     }
