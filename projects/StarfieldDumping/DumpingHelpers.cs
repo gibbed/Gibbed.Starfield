@@ -30,9 +30,9 @@ namespace StarfieldDumping
 {
     public static class DumpingHelpers
     {
-        public delegate int MainDelegate(RuntimeProcess runtime, AddressLibrary addressLibrary, string[] args);
+        public delegate int MainDelegate<T>(RuntimeProcess runtime, AddressLibrary addressLibrary, T arg);
 
-        public static int Main(string[] args, MainDelegate callback)
+        public static int Main<T>(T arg, MainDelegate<T> callback)
         {
             if (callback == null)
             {
@@ -76,7 +76,7 @@ namespace StarfieldDumping
                 return -4;
             }
 
-            var result = callback(runtime, addressLibrary, args);
+            var result = callback(runtime, addressLibrary, arg);
             return result >= 0
                 ? result
                 : -5 + result;
