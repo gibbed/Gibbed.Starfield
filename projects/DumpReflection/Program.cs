@@ -26,6 +26,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using DumpReflection.Reflection;
 using Gibbed.AddressLibrary;
+using Gibbed.IO;
 using StarfieldDumping;
 using TypeId = DumpReflection.Natives.TypeId;
 
