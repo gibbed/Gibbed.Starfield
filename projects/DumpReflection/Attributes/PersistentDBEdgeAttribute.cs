@@ -22,7 +22,7 @@
 
 namespace DumpReflection.Attributes
 {
-    internal class PersistentDBEdgeAttribute : EmptyBaseAttribute 
+    internal class PersistentDBEdgeAttribute : BaseEmptyAttribute
     {
     }
 }

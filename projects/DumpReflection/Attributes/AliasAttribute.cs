@@ -20,36 +20,9 @@
  *    distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-using DumpReflection.Reflection;
-using StarfieldDumping;
-
 namespace DumpReflection.Attributes
 {
-    internal class AliasAttribute : BaseAttribute<AliasAttribute.Native>
+    internal class AliasAttribute : BaseStringAttribute
     {
-        public string Alias { get; set; }
-
-        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
-        {
-            this.Alias = runtime.ReadStringZ(native.Alias, Encoding.ASCII);
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Native
-        {
-            public IntPtr Alias; // 0
-
-            static Native()
-            {
-                if (Marshal.SizeOf(typeof(Native)) != 0x8)
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-        }
     }
 }

@@ -20,36 +20,9 @@
  *    distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-using DumpReflection.Reflection;
-using StarfieldDumping;
-
 namespace DumpReflection.Attributes
 {
-    internal class ToolTipAttribute : BaseAttribute<ToolTipAttribute.Native>
+    internal class ToolTipAttribute : BaseStringAttribute
     {
-        public string ToolTip { get; set; }
-
-        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
-        {
-            this.ToolTip = runtime.ReadStringZ(native.ToolTip, Encoding.ASCII);
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Native
-        {
-            public IntPtr ToolTip; // 0
-
-            static Native()
-            {
-                if (Marshal.SizeOf(typeof(Native)) != 0x8)
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-        }
     }
 }

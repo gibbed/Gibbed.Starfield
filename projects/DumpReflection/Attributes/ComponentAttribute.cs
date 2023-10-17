@@ -22,7 +22,7 @@
 
 namespace DumpReflection.Attributes
 {
-    internal class ComponentAttribute : EmptyBaseAttribute
+    internal class ComponentAttribute : BaseEmptyAttribute
     {
     }
 }

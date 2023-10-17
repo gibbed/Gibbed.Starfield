@@ -81,6 +81,7 @@ namespace DumpReflection.Reflection
             var native = runtime.ReadStructure<Natives.EnumMember>(nativePointer);
 
             EnumMember instance = new();
+            instance.NativePointer = nativePointer;
             instance.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
             instance.Value = native.Value;
             return instance;

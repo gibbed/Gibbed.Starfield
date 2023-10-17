@@ -25,47 +25,16 @@ using System.Runtime.InteropServices;
 
 namespace DumpReflection.Natives
 {
-    // appears to be BSTHashMap<>
     [StructLayout(LayoutKind.Sequential)]
-    internal struct ClassAttributesHashMap
+    internal struct AttributeData
     {
-        public static readonly int EntrySize;
+        public StdVector Data; // 00
+        public int FirstOffset; // 18
+        public int LastOffset; // 18
 
-        public Pair Unknown; // 00
-        public IntPtr Table; // 28
-        public ulong Size; // 30
-        public ulong Free; // 38
-        public ulong LastFree; // 40
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Pair
+        static AttributeData()
         {
-            public IntPtr Key; // 00
-            public ClassAttributes Value; // 08
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        public struct Entry
-        {
-            public Pair Pair; // 00
-            public int NextIndex; // 28
-            public int Index; // 2C
-        }
-
-        static ClassAttributesHashMap()
-        {
-            if (Marshal.SizeOf(typeof(ClassAttributesHashMap)) != 0x48)
-            {
-                throw new InvalidOperationException();
-            }
-
-            if (Marshal.SizeOf(typeof(Pair)) != 0x28)
-            {
-                throw new InvalidOperationException();
-            }
-
-            EntrySize = Marshal.SizeOf(typeof(Entry));
-            if (EntrySize != 0x30)
+            if (Marshal.SizeOf(typeof(AttributeData)) != 0x20)
             {
                 throw new InvalidOperationException();
             }

@@ -22,7 +22,7 @@
 
 namespace DumpReflection.Attributes
 {
-    internal class DeprecatedAttribute : EmptyBaseAttribute
+    internal class DeprecatedAttribute : BaseEmptyAttribute
     {
     }
 }

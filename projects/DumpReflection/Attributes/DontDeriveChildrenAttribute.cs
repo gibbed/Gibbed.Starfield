@@ -22,7 +22,7 @@
 
 namespace DumpReflection.Attributes
 {
-    internal class DontDeriveChildrenAttribute : EmptyBaseAttribute
+    internal class DontDeriveChildrenAttribute : BaseEmptyAttribute
     {
     }
 }

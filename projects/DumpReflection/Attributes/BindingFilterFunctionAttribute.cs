@@ -22,7 +22,8 @@
 
 namespace DumpReflection.Attributes
 {
-    internal class SerializableAttribute : BaseUIntAttribute
+    internal class BindingFilterFunctionAttribute : BasePointerAttribute
     {
+        // TODO(gibbed): callback function pointer
     }
 }

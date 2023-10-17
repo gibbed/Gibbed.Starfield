@@ -32,10 +32,12 @@ namespace DumpReflection.Reflection
     {
         public static IntPtr ExpectedVftablePointer;
 
+        #region Fields
         private string _Name;
         private readonly List<ClassProperty> _Properties;
         private readonly List<ClassCast> _Upcasts;
         private readonly List<ClassCast> _Downcasts;
+        #endregion
 
         public ClassType()
         {
@@ -44,10 +46,12 @@ namespace DumpReflection.Reflection
             this._Downcasts = new();
         }
 
+        #region Properties
         public override string Name => this._Name;
         public List<ClassProperty> Properties => this._Properties;
         public List<ClassCast> Upcasts => this._Upcasts;
         public List<ClassCast> Downcasts => this._Downcasts;
+        #endregion
 
         protected override void Read(RuntimeProcess runtime, IntPtr nativePointer, Natives.ClassType native)
         {
@@ -128,26 +132,26 @@ namespace DumpReflection.Reflection
             this._Upcasts.AddRange(upcasts);
             this._Downcasts.Clear();
             this._Downcasts.AddRange(downcasts);
+
+            if (native.Unknown8C != 0)
+            {
+
+            }
         }
 
         private static ClassProperty ReadProperty(RuntimeProcess runtime, IntPtr nativePointer)
         {
             var native = runtime.ReadStructure<Natives.ClassProperty>(nativePointer);
 
-            if (native.Unknown14 != 0 ||
-                native.Unknown18 != IntPtr.Zero ||
-                native.Unknown20 != IntPtr.Zero ||
-                native.Unknown28 != IntPtr.Zero ||
-                native.Unknown30 != -1 ||
-                native.Unknown34 != -1)
+            if (native.Unknown14 != 0)
             {
-
             }
 
             ClassProperty instance = new();
             instance.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
             instance.TypePointer = native.Type;
             instance.Offset = native.Offset;
+            instance.AttributeData = native.AttributeData;
             return instance;
         }
 
@@ -190,6 +194,15 @@ namespace DumpReflection.Reflection
                     throw new InvalidOperationException();
                 }
                 downcast.Type = castType;
+            }
+        }
+
+        public void ReadPropertyAttributes(RuntimeProcess runtime, Dictionary<IntPtr, IType> typeMap)
+        {
+            foreach (var property in this._Properties)
+            {
+                property.Attributes.Clear();
+                property.Attributes.AddRange(Program.ReadAttributes(runtime, property.AttributeData, typeMap));
             }
         }
     }

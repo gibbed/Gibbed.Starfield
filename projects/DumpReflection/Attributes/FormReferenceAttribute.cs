@@ -20,24 +20,9 @@
  *    distribution.
  */
 
-using System;
-using System.Runtime.InteropServices;
-
-namespace DumpReflection.Natives
+namespace DumpReflection.Attributes
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct ClassAttribute
+    internal class FormReferenceAttribute : BaseStringAttribute
     {
-        public IntPtr Type; // 00
-        public int NextOffset; // 08
-        public int PreviousOffset; // 0C
-
-        static ClassAttribute()
-        {
-            if (Marshal.SizeOf(typeof(ClassAttribute)) != 0x10)
-            {
-                throw new InvalidOperationException();
-            }
-        }
     }
 }

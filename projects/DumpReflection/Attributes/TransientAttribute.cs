@@ -22,7 +22,7 @@
 
 namespace DumpReflection.Attributes
 {
-    internal class TransientAttribute : EmptyBaseAttribute
+    internal class TransientAttribute : BaseEmptyAttribute
     {
     }
 }

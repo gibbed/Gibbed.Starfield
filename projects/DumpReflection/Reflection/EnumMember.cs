@@ -20,12 +20,28 @@
  *    distribution.
  */
 
+using System;
+using System.Collections.Generic;
+
 namespace DumpReflection.Reflection
 {
     internal class EnumMember
     {
+        #region Fields
+        private readonly List<Attributes.IAttribute> _Attributes;
+        #endregion
+
+        public EnumMember()
+        {
+            this._Attributes = new();
+        }
+
+        #region Properties
+        public IntPtr NativePointer;
         public string Name { get; set; }
         public long Value { get; set; }
+        public List<Attributes.IAttribute> Attributes => this._Attributes;
+        #endregion
 
         public override string ToString()
         {

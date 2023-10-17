@@ -30,11 +30,13 @@ namespace DumpReflection.Attributes
     internal abstract class BaseAttribute<TNative> : IAttribute
     {
         #region Fields
+        private string _NativeName;
         private IntPtr _NativePointer;
         #endregion
 
         #region Properties
         public IntPtr NativePointer => this._NativePointer;
+        public string NativeName { get => this._NativeName; set => this._NativeName = value; }
         public Type NativeType => typeof(TNative);
         #endregion
 

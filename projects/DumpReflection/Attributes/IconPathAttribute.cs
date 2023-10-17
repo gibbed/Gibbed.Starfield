@@ -20,36 +20,9 @@
  *    distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-using DumpReflection.Reflection;
-using StarfieldDumping;
-
 namespace DumpReflection.Attributes
 {
-    internal class IconPathAttribute : BaseAttribute<IconPathAttribute.Native>
+    internal class IconPathAttribute : BaseStringAttribute
     {
-        public string IconPath { get; set; }
-
-        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
-        {
-            this.IconPath = runtime.ReadStringZ(native.IconPath, Encoding.ASCII);
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Native
-        {
-            public IntPtr IconPath; // 0
-
-            static Native()
-            {
-                if (Marshal.SizeOf(typeof(Native)) != 0x8)
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-        }
     }
 }

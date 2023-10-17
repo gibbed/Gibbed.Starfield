@@ -20,24 +20,9 @@
  *    distribution.
  */
 
-using System;
-using System.Runtime.InteropServices;
-
-namespace DumpReflection.Natives
+namespace DumpReflection.Attributes
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct ClassAttributes
+    internal class ReadOnlyAttribute : BaseEmptyAttribute
     {
-        public StdVector Data; // 00
-        public int FirstOffset; // 18
-        public int LastOffset; // 18
-
-        static ClassAttributes()
-        {
-            if (Marshal.SizeOf(typeof(ClassAttributes)) != 0x20)
-            {
-                throw new InvalidOperationException();
-            }
-        }
     }
 }

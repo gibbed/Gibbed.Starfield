@@ -22,7 +22,7 @@
 
 namespace DumpReflection.Attributes
 {
-    internal class UnsortedAttribute : EmptyBaseAttribute
+    internal class UnsortedAttribute : BaseEmptyAttribute
     {
     }
 }

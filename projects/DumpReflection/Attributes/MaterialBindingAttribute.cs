@@ -20,9 +20,33 @@
  *    distribution.
  */
 
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using DumpReflection.Reflection;
+using StarfieldDumping;
+
 namespace DumpReflection.Attributes
 {
-    internal class SerializableAttribute : BaseUIntAttribute
+    internal class MaterialBindingAttribute : BaseAttribute<MaterialBindingAttribute.Native>
     {
+        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
+        {
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct Native
+        {
+            public IntPtr Unknown0; // 0
+            public IntPtr Unknown8; // 8
+
+            static Native()
+            {
+                if (Marshal.SizeOf(typeof(Native)) != 0x10)
+                {
+                    throw new InvalidOperationException();
+                }
+            }
+        }
     }
 }

@@ -22,12 +22,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using DumpReflection.Reflection;
 using Gibbed.AddressLibrary;
 using Gibbed.IO;
 using StarfieldDumping;
+using IndentedTextWriter = System.CodeDom.Compiler.IndentedTextWriter;
 using TypeId = DumpReflection.Natives.TypeId;
 
 namespace DumpReflection
@@ -148,41 +151,123 @@ namespace DumpReflection
                 instance.Resolve(typeMap);
             }
 
-            // attributes
-            var classAttributesHashMapPointerPointer = Id2Pointer(885842);
-            var classAttributesHashMapPointer = runtime.ReadPointer(classAttributesHashMapPointerPointer);
-            ReadClassAttributes(runtime, classAttributesHashMapPointer, typeMap);
+            Dictionary<IntPtr, EnumMember> enumMemberMap = new();
+            foreach (var instance in typeMap.Values.OfType<EnumType>())
+            {
+                foreach (var member in instance.Members)
+                {
+                    enumMemberMap.Add(member.NativePointer, member);
+                }
+            }
+
+            // type attributes
+            var typeAttributesHashMapPointerPointer = Id2Pointer(885842);
+            var typeAttributesHashMapPointer = runtime.ReadPointer(typeAttributesHashMapPointerPointer);
+            ReadAttributes(runtime, typeAttributesHashMapPointer, typeMap, p => typeMap[p].Attributes);
+
+            // enum member attributes
+            var enumMemberAttributesHashMapPointerPointer = Id2Pointer(885840);
+            var enumMemberAttributesHashMapPointer = runtime.ReadPointer(enumMemberAttributesHashMapPointerPointer);
+            ReadAttributes(runtime, enumMemberAttributesHashMapPointer, typeMap, p => enumMemberMap[p].Attributes);
+
+            // class property attributes
+            foreach (var instance in typeMap.Values.OfType<ClassType>())
+            {
+                instance.ReadPropertyAttributes(runtime, typeMap);
+            }
+
+
+            // TODO(gibbed): JSON output
+            // TODO(gibbed): C# output
+
+            StringBuilder sb = new();
+            using StringWriter stringWriter = new(sb);
+            using IndentedTextWriter writer = new(stringWriter, "  ");
 
             foreach (var instance in typeMap.Values.OfType<ClassType>())
             {
-                Console.WriteLine($"class {instance.Name}");
-
+                WriteAttributes(writer, instance.Attributes);
+                writer.WriteLine($"class {instance.Name}");
+                writer.WriteLine("{");
                 foreach (var property in instance.Properties)
                 {
-                    Console.WriteLine($"  {property.Name} : {property.Type.Name} @{property.Offset:X}");
+                    writer.Indent++;
+                    WriteAttributes(writer, property.Attributes);
+                    writer.WriteLine($"public {property.Type.Name} {property.Name}; // @{property.Offset:X}");
+                    writer.Indent--;
                 }
-
-                Console.WriteLine();
+                writer.WriteLine("}");
+                writer.WriteLine();
             }
 
             foreach (var instance in typeMap.Values.OfType<EnumType>())
             {
-                Console.WriteLine($"enum {instance.Name}");
-
+                WriteAttributes(writer, instance.Attributes);
+                writer.WriteLine($"enum {instance.Name}");
+                writer.WriteLine("{");
                 foreach (var member in instance.Members)
                 {
-                    Console.WriteLine($"  {member.Name} = {member.Value}");
+                    writer.Indent++;
+                    WriteAttributes(writer, member.Attributes);
+                    writer.WriteLine($"{member.Name} = {member.Value},");
+                    writer.Indent--;
                 }
-
-                Console.WriteLine();
+                writer.WriteLine("}");
+                writer.WriteLine();
             }
 
+            writer.Flush();
+            stringWriter.Flush();
+
+            File.WriteAllText("reflection_dump.cs", sb.ToString());
             return 0;
         }
 
-        private static void ReadClassAttributes(RuntimeProcess runtime, IntPtr nativePointer, Dictionary<IntPtr, IType> typeMap)
+        private static void WriteAttributes(IndentedTextWriter writer, List<Attributes.IAttribute> attributes)
         {
-            var native = runtime.ReadStructure<Natives.ClassAttributesHashMap>(nativePointer);
+            foreach (var attribute in attributes)
+            {
+                writer.Write($"[{attribute.NativeName}");
+                if (attribute is Attributes.BaseEmptyAttribute)
+                {
+                }
+                else if (attribute is Attributes.BaseByteAttribute byteAttribute)
+                {
+                    writer.Write($"(0x{byteAttribute.Value:X})");
+                }
+                else if (attribute is Attributes.BaseUIntAttribute uintAttribute)
+                {
+                    writer.Write($"(0x{uintAttribute.Value:X})");
+                }
+                else if (attribute is Attributes.BaseStringAttribute stringAttribute)
+                {
+                    var value = stringAttribute.Value;
+                    value = value.Replace("\\", "\\\\");
+                    value = value.Replace("\n", "\\n");
+                    value = value.Replace("\r", "\\r");
+                    value = value.Replace("\"", "\\\"");
+                    value = value.Replace("\"", "\\\"");
+                    writer.Write($"(\"{value}\")");
+                }
+                else if (attribute is Attributes.BasePointerAttribute pointerAttribute)
+                {
+                    writer.Write($"(0x{pointerAttribute.Value.ToInt64():X})");
+                }
+                else if (attribute is Attributes.AttributeAttribute attributeAttribute)
+                {
+                    writer.Write($"(Usage = {attributeAttribute.Usage})");
+                }
+                else
+                {
+                    writer.Write($"(?)");
+                }
+                writer.WriteLine($"]");
+            }
+        }
+
+        private static void ReadAttributes(RuntimeProcess runtime, IntPtr nativePointer, Dictionary<IntPtr, IType> typeMap, Func<IntPtr, List<Attributes.IAttribute>> getAttributesForPointer)
+        {
+            var native = runtime.ReadStructure<Natives.AttributesHashMap>(nativePointer);
 
             if (native.Size > int.MaxValue)
             {
@@ -191,13 +276,13 @@ namespace DumpReflection
 
             var entryCount = (int)native.Size;
 
-            var entrySize = Natives.ClassAttributesHashMap.EntrySize;
+            var entrySize = Natives.AttributesHashMap.EntrySize;
             var endPointer = native.Table + entrySize * entryCount;
-            var table = new Natives.ClassAttributesHashMap.Entry[native.Size];
+            var table = new Natives.AttributesHashMap.Entry[native.Size];
             var entryPointer = native.Table;
             for (var i = 0; entryPointer != endPointer; i++, entryPointer += entrySize)
             {
-                table[i] = runtime.ReadStructure<Natives.ClassAttributesHashMap.Entry>(entryPointer);
+                table[i] = runtime.ReadStructure<Natives.AttributesHashMap.Entry>(entryPointer);
             }
 
             int index = 0;
@@ -209,36 +294,38 @@ namespace DumpReflection
                 }
 
                 var pair = table[index].Pair;
-                var type = typeMap[pair.Key];
-                if (type.Attributes.Count > 0)
+
+                var attributes = getAttributesForPointer(pair.Key);
+                if (attributes.Count > 0)
                 {
                     throw new InvalidOperationException();
                 }
-                type.Attributes.Clear();
-                type.Attributes.AddRange(ReadAttributes(runtime, pair.Value, typeMap));
+                attributes.Clear();
+                attributes.AddRange(ReadAttributes(runtime, pair.Value, typeMap));
                 index++;
             }
         }
 
-        private static List<Attributes.IAttribute> ReadAttributes(RuntimeProcess runtime, Natives.ClassAttributes native, Dictionary<IntPtr, IType> typeMap)
+        internal static IEnumerable<Attributes.IAttribute> ReadAttributes(RuntimeProcess runtime, Natives.AttributeData native, Dictionary<IntPtr, IType> typeMap)
         {
             List<Attributes.IAttribute> attributes = new();
             int nextOffset = native.FirstOffset;
             while (nextOffset != -1)
             {
                 var attributePointer = native.Data.Start + nextOffset;
-                var attribute = runtime.ReadStructure<Natives.ClassAttribute>(attributePointer);
+                var attribute = runtime.ReadStructure<Natives.Attribute>(attributePointer);
                 attributes.Add(ReadAttribute(runtime, attributePointer, attribute, typeMap));
                 nextOffset = attribute.NextOffset;
             }
             return attributes;
         }
 
-        private static Attributes.IAttribute ReadAttribute(RuntimeProcess runtime, IntPtr nativePointer, Natives.ClassAttribute native, Dictionary<IntPtr, IType> typeMap)
+        private static Attributes.IAttribute ReadAttribute(RuntimeProcess runtime, IntPtr nativePointer, Natives.Attribute native, Dictionary<IntPtr, IType> typeMap)
         {
             var type = typeMap[native.Type];
             IntPtr dataPointer = nativePointer - ((int)type.TypeSize).Align(8);
             var attribute = AttributeFactory.Create(type.Name);
+            attribute.NativeName = type.Name;
             var size = Marshal.SizeOf(attribute.NativeType);
             if (size != type.TypeSize)
             {

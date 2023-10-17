@@ -22,7 +22,7 @@
 
 namespace DumpReflection.Attributes
 {
-    internal class EditInlineAttribute : EmptyBaseAttribute
+    internal class EditInlineAttribute : BaseEmptyAttribute
     {
     }
 }

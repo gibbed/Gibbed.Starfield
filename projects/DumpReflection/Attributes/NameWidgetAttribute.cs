@@ -20,36 +20,9 @@
  *    distribution.
  */
 
-using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Text;
-using DumpReflection.Reflection;
-using StarfieldDumping;
-
 namespace DumpReflection.Attributes
 {
-    internal class NameWidgetAttribute : BaseAttribute<NameWidgetAttribute.Native>
+    internal class NameWidgetAttribute : BaseStringAttribute
     {
-        public string Name { get; set; }
-
-        protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
-        {
-            this.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Native
-        {
-            public IntPtr Name; // 0
-
-            static Native()
-            {
-                if (Marshal.SizeOf(typeof(Native)) != 0x8)
-                {
-                    throw new InvalidOperationException();
-                }
-            }
-        }
     }
 }

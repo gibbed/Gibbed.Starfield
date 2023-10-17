@@ -21,15 +21,25 @@
  */
 
 using System;
+using System.Collections.Generic;
 
 namespace DumpReflection.Reflection
 {
     internal class ClassProperty
     {
+        private readonly List<Attributes.IAttribute> _Attributes;
+
+        public ClassProperty()
+        {
+            this._Attributes = new();
+        }
+
         public string Name { get; set; }
         public IntPtr TypePointer { get; set; }
         public IType Type { get; set; }
         public long Offset { get; set; }
+        public Natives.AttributeData AttributeData { get; set; }
+        public List<Attributes.IAttribute> Attributes => this._Attributes;
 
         public override string ToString()
         {

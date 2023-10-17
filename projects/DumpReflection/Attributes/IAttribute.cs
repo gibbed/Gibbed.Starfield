@@ -29,6 +29,7 @@ namespace DumpReflection.Attributes
 {
     internal interface IAttribute
     {
+        string NativeName { get; set; }
         Type NativeType { get; }
 
         void Read(RuntimeProcess runtime, IntPtr nativePointer, Dictionary<IntPtr, IType> typeMap);

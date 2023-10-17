@@ -22,7 +22,7 @@
 
 namespace DumpReflection.Attributes
 {
-    internal class SerializableAttribute : BaseUIntAttribute
+    internal class VolatileAttribute : BaseEmptyAttribute
     {
     }
 }

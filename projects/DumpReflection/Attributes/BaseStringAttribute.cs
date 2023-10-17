@@ -23,29 +23,29 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 using DumpReflection.Reflection;
 using StarfieldDumping;
 
 namespace DumpReflection.Attributes
 {
-    internal abstract class EmptyBaseAttribute : BaseAttribute<EmptyBaseAttribute.Native>
+    internal class BaseStringAttribute : BaseAttribute<BaseStringAttribute.Native>
     {
+        public string Value { get; set; }
+
         protected override void Read(RuntimeProcess runtime, Native native, Dictionary<IntPtr, IType> typeMap)
         {
-            if (native.Dummy != 0)
-            {
-                throw new InvalidOperationException();
-            }
+            this.Value = runtime.ReadStringZ(native.Value, Encoding.ASCII);
         }
 
         [StructLayout(LayoutKind.Sequential)]
         internal struct Native
         {
-            public byte Dummy; // 0
+            public IntPtr Value; // 0
 
             static Native()
             {
-                if (Marshal.SizeOf(typeof(Native)) != 0x1)
+                if (Marshal.SizeOf(typeof(Native)) != 0x8)
                 {
                     throw new InvalidOperationException();
                 }

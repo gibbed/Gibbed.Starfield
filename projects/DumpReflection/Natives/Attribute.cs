@@ -20,9 +20,24 @@
  *    distribution.
  */
 
-namespace DumpReflection.Attributes
+using System;
+using System.Runtime.InteropServices;
+
+namespace DumpReflection.Natives
 {
-    internal class SerializableAttribute : BaseUIntAttribute
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct Attribute
     {
+        public IntPtr Type; // 00
+        public int NextOffset; // 08
+        public int PreviousOffset; // 0C
+
+        static Attribute()
+        {
+            if (Marshal.SizeOf(typeof(Attribute)) != 0x10)
+            {
+                throw new InvalidOperationException();
+            }
+        }
     }
 }
