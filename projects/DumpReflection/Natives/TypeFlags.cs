@@ -35,7 +35,7 @@ namespace DumpReflection.Natives
         HasUnknownCallback30 = 1 << 3,
         HasUnknownCallback28 = 1 << 4,
         ClaimsToBeAStruct = 1 << 5,
-        IsStruct = 1 << 6,
+        IsStruct = 1 << 6, // set when all property sizes add up to the class size
         Unknown7 = 1 << 7,
 
         Everything = 0xFF,

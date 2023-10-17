@@ -21,29 +21,19 @@
  */
 
 using System;
-using System.Runtime.InteropServices;
 
-namespace DumpReflection.Natives
+namespace DumpReflection.Reflection
 {
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct ClassField
+    internal class ClassProperty
     {
-        public IntPtr Name; // 00
-        public IntPtr Type; // 08
-        public uint Offset; // 10
-        public uint Unknown14; // 14
-        public IntPtr Unknown18; // 18
-        public IntPtr Unknown20; // 20
-        public IntPtr Unknown28; // 28
-        public int Unknown30; // 30
-        public int Unknown34; // 34
+        public string Name { get; set; }
+        public IntPtr TypePointer { get; set; }
+        public IType Type { get; set; }
+        public long Offset { get; set; }
 
-        static ClassField()
+        public override string ToString()
         {
-            if (Marshal.SizeOf(typeof(ClassField)) != 0x38)
-            {
-                throw new InvalidOperationException();
-            }
+            return $"{this.Name} : {this.Type.Name} @{this.Offset:X}";
         }
     }
 }

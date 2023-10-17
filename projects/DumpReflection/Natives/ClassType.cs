@@ -35,7 +35,7 @@ namespace DumpReflection.Natives
         public IntPtr UnknownCallback28; // 28
         public IntPtr UnknownCallback30; // 30
         public IntPtr UnknownCallback38; // 38
-        public StdVector Fields; // 40
+        public StdVector Properties; // 40
         public StdVector Upcasts; // 58
         public StdVector Downcasts; // 70
         public ClassFlags Flags; // 88

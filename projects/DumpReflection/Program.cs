@@ -118,9 +118,9 @@ namespace DumpReflection
 
                 if (instance is ClassType classType)
                 {
-                    foreach (var field in classType.Fields)
+                    foreach (var property in classType.Properties)
                     {
-                        queue.Enqueue(field.TypePointer);
+                        queue.Enqueue(property.TypePointer);
                     }
 
                     foreach (var cast in classType.Downcasts)
@@ -151,9 +151,9 @@ namespace DumpReflection
             {
                 Console.WriteLine($"class {instance.Name}");
 
-                foreach (var field in instance.Fields)
+                foreach (var property in instance.Properties)
                 {
-                    Console.WriteLine($"  {field.Name} : {field.Type.Name} @{field.Offset:X}");
+                    Console.WriteLine($"  {property.Name} : {property.Type.Name} @{property.Offset:X}");
                 }
 
                 Console.WriteLine();

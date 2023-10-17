@@ -33,19 +33,19 @@ namespace DumpReflection.Reflection
         public static IntPtr ExpectedVftablePointer;
 
         private string _Name;
-        private readonly List<ClassField> _Fields;
+        private readonly List<ClassProperty> _Properties;
         private readonly List<ClassCast> _Upcasts;
         private readonly List<ClassCast> _Downcasts;
 
         public ClassType()
         {
-            this._Fields = new();
+            this._Properties = new();
             this._Upcasts = new();
             this._Downcasts = new();
         }
 
         public override string Name => this._Name;
-        public List<ClassField> Fields => this._Fields;
+        public List<ClassProperty> Properties => this._Properties;
         public List<ClassCast> Upcasts => this._Upcasts;
         public List<ClassCast> Downcasts => this._Downcasts;
 
@@ -103,11 +103,11 @@ namespace DumpReflection.Reflection
                 throw new InvalidOperationException();
             }
 
-            var fieldSize = Marshal.SizeOf(typeof(Natives.ClassField));
-            List<ClassField> fields = new();
-            for (var fieldPointer = native.Fields.Start; fieldPointer != native.Fields.End; fieldPointer += fieldSize)
+            var propertySize = Marshal.SizeOf(typeof(Natives.ClassProperty));
+            List<ClassProperty> properties = new();
+            for (var propertyPointer = native.Properties.Start; propertyPointer != native.Properties.End; propertyPointer += propertySize)
             {
-                fields.Add(ReadField(runtime, fieldPointer));
+                properties.Add(ReadProperty(runtime, propertyPointer));
             }
 
             var castSize = Marshal.SizeOf(typeof(Natives.ClassCast));
@@ -122,17 +122,17 @@ namespace DumpReflection.Reflection
                 downcasts.Add(ReadCast(runtime, castPointer));
             }
 
-            this._Fields.Clear();
-            this._Fields.AddRange(fields);
+            this._Properties.Clear();
+            this._Properties.AddRange(properties);
             this._Upcasts.Clear();
             this._Upcasts.AddRange(upcasts);
             this._Downcasts.Clear();
             this._Downcasts.AddRange(downcasts);
         }
 
-        private static ClassField ReadField(RuntimeProcess runtime, IntPtr nativePointer)
+        private static ClassProperty ReadProperty(RuntimeProcess runtime, IntPtr nativePointer)
         {
-            var native = runtime.ReadStructure<Natives.ClassField>(nativePointer);
+            var native = runtime.ReadStructure<Natives.ClassProperty>(nativePointer);
 
             if (native.Unknown14 != 0 ||
                 native.Unknown18 != IntPtr.Zero ||
@@ -144,7 +144,7 @@ namespace DumpReflection.Reflection
 
             }
 
-            ClassField instance = new();
+            ClassProperty instance = new();
             instance.Name = runtime.ReadStringZ(native.Name, Encoding.ASCII);
             instance.TypePointer = native.Type;
             instance.Offset = native.Offset;
@@ -165,13 +165,13 @@ namespace DumpReflection.Reflection
         {
             base.Resolve(typeMap);
 
-            foreach (var field in this._Fields)
+            foreach (var property in this._Properties)
             {
-                if (typeMap.TryGetValue(field.TypePointer, out var fieldType) == false)
+                if (typeMap.TryGetValue(property.TypePointer, out var fieldType) == false)
                 {
                     throw new InvalidOperationException();
                 }
-                field.Type = fieldType;
+                property.Type = fieldType;
             }
 
             foreach (var upcast in this._Upcasts)

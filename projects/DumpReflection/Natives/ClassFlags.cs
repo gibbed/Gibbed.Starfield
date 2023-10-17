@@ -25,7 +25,7 @@ using System;
 namespace DumpReflection.Natives
 {
     [Flags]
-    public enum ClassFlags : byte
+    internal enum ClassFlags : byte
     {
         None = 0,
 

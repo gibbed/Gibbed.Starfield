@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 namespace DumpReflection.Natives
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal class StdVector
+    internal struct StdVector
     {
         public IntPtr Start; // 00
         public IntPtr End; // 08
