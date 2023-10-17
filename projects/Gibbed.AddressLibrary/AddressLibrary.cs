@@ -24,6 +24,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Gibbed.IO;
 
@@ -129,6 +130,12 @@ namespace Gibbed.AddressLibrary
             var build = input.ReadValueS32(endian);
             var revision = input.ReadValueS32(endian);
             return new(major, minor, build, revision);
+        }
+
+        public AddressLibrary Invert()
+        {
+            Dictionary<ulong, ulong> entries = this._Entries.ToDictionary(kv => kv.Value, kv => kv.Key);
+            return new AddressLibrary(this.FileVersion, this.FileName, this.PointerSize, entries);
         }
 
         public bool ContainsKey(ulong key)
