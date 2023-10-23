@@ -25,16 +25,17 @@ using System.Runtime.InteropServices;
 
 namespace DumpReflection.Natives
 {
+    // BSReflection::ClassType -> BSReflection::ReflectionBase<BSReflection::ClassType> -> BSReflection::IType
     [StructLayout(LayoutKind.Sequential)]
     internal class ClassType
     {
         public BaseType Base; // 00
         public IntPtr Next; // 10
         public IntPtr Name; // 18
-        public IntPtr UnknownCallback20; // 20
-        public IntPtr UnknownCallback28; // 28
-        public IntPtr UnknownCallback30; // 30
-        public IntPtr UnknownCallback38; // 38
+        public IntPtr CtorCallback; // 20
+        public IntPtr DtorCallback; // 28
+        public IntPtr MoveCallback; // 30
+        public IntPtr CopyCallback; // 38
         public StdVector Properties; // 40
         public StdVector Upcasts; // 58
         public StdVector Downcasts; // 70

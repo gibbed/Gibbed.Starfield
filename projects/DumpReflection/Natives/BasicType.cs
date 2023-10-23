@@ -25,6 +25,7 @@ using System.Runtime.InteropServices;
 
 namespace DumpReflection.Natives
 {
+    // BSReflection::BasicType -> BSReflection::IType
     [StructLayout(LayoutKind.Sequential)]
     internal struct BasicType
     {

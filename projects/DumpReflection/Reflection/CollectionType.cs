@@ -57,11 +57,16 @@ namespace DumpReflection.Reflection
                 throw new InvalidOperationException();
             }
 
-            var knownFlags =
-                Natives.TypeFlags.HasUnknownCallback20 |
-                Natives.TypeFlags.HasUnknownCallback38 |
-                Natives.TypeFlags.HasUnknownCallback30 |
-                Natives.TypeFlags.HasUnknownCallback28 |
+            var expectedFlags = Natives.TypeFlags.HasCtor |
+                //Natives.TypeFlags.HasUnknownCallback38 |
+                Natives.TypeFlags.HasMove |
+                Natives.TypeFlags.HasDtor;
+            if ((this.Flags & expectedFlags) != expectedFlags)
+            {
+                throw new InvalidOperationException();
+            }
+            var knownFlags = expectedFlags |
+                Natives.TypeFlags.HasCopy |
                 Natives.TypeFlags.ClaimsToBeAStruct |
                 Natives.TypeFlags.IsStruct;
             var unknownFlags = this.Flags & ~knownFlags;

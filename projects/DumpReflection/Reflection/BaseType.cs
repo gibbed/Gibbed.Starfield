@@ -79,9 +79,13 @@ namespace DumpReflection.Reflection
 
         void IType.WriteJson(JsonWriter writer, Func<IntPtr, ulong> pointer2Id)
         {
+            //writer.WritePropertyName("id");
+            //writer.WriteValue(pointer2Id(this.NativePointer));
+
             writer.WritePropertyName("name");
             writer.WriteValue(this.Name);
 
+            /*
             if (this is CollectionType && this.Name == "std::map")
             {
                 writer.WritePropertyName("name_is_liar");
@@ -90,9 +94,7 @@ namespace DumpReflection.Reflection
                 writer.WritePropertyName("actual_name");
                 writer.WriteValue("std::set");
             }
-
-            //writer.WritePropertyName("id");
-            //writer.WriteValue(pointer2Id(this.NativePointer));
+            */
 
             writer.WritePropertyName("vftable");
             writer.WriteValue(pointer2Id(this.VftablePointer));

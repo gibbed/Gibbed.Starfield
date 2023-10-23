@@ -42,10 +42,10 @@ namespace DumpReflection.Reflection
             }
 
             var knownFlags =
-                Natives.TypeFlags.HasUnknownCallback20 |
-                Natives.TypeFlags.HasUnknownCallback38 |
-                Natives.TypeFlags.HasUnknownCallback30 |
-                Natives.TypeFlags.HasUnknownCallback28;
+                Natives.TypeFlags.HasCtor |
+                Natives.TypeFlags.HasCopy |
+                Natives.TypeFlags.HasMove |
+                Natives.TypeFlags.HasDtor;
             if (this.Flags != knownFlags)
             {
                 throw new InvalidOperationException();

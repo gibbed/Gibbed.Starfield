@@ -30,10 +30,10 @@ namespace DumpReflection.Natives
         None = 0,
 
         Unknown0 = 1 << 0,
-        HasUnknownCallback20 = 1 << 1,
-        HasUnknownCallback38 = 1 << 2,
-        HasUnknownCallback30 = 1 << 3,
-        HasUnknownCallback28 = 1 << 4,
+        HasCtor = 1 << 1,
+        HasCopy = 1 << 2,
+        HasMove = 1 << 3,
+        HasDtor = 1 << 4,
         ClaimsToBeAStruct = 1 << 5,
         IsStruct = 1 << 6, // set when all property sizes add up to the class size
         Unknown7 = 1 << 7,

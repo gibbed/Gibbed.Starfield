@@ -49,15 +49,14 @@ namespace DumpReflection.Reflection
 
         #region Properties
         public override string Name => this._Name;
-        public IntPtr UnknownCallback20 { get; set; }
-        public IntPtr UnknownCallback28 { get; set; }
-        public IntPtr UnknownCallback30 { get; set; }
-        public IntPtr UnknownCallback38 { get; set; }
+        public IntPtr CtorCallback { get; set; }
+        public IntPtr DtorCallback { get; set; }
+        public IntPtr MoveCallback { get; set; }
+        public IntPtr CopyCallback { get; set; }
         public List<ClassProperty> Properties => this._Properties;
         public List<ClassCast> Upcasts => this._Upcasts;
         public List<ClassCast> Downcasts => this._Downcasts;
         public Natives.ClassFlags ClassFlags { get; set; }
-        public ushort Unknown8C { get; set; }
         #endregion
 
         protected override void Read(RuntimeProcess runtime, IntPtr nativePointer, Natives.ClassType native)
@@ -77,21 +76,21 @@ namespace DumpReflection.Reflection
             }
 
             var expectedTypeFlags = Natives.TypeFlags.None;
-            if (native.UnknownCallback20 != IntPtr.Zero)
+            if (native.CtorCallback != IntPtr.Zero)
             {
-                expectedTypeFlags |= Natives.TypeFlags.HasUnknownCallback20;
+                expectedTypeFlags |= Natives.TypeFlags.HasCtor;
             }
-            if (native.UnknownCallback28 != IntPtr.Zero)
+            if (native.DtorCallback != IntPtr.Zero)
             {
-                expectedTypeFlags |= Natives.TypeFlags.HasUnknownCallback28;
+                expectedTypeFlags |= Natives.TypeFlags.HasDtor;
             }
-            if (native.UnknownCallback30 != IntPtr.Zero)
+            if (native.MoveCallback != IntPtr.Zero)
             {
-                expectedTypeFlags |= Natives.TypeFlags.HasUnknownCallback30;
+                expectedTypeFlags |= Natives.TypeFlags.HasMove;
             }
-            if (native.UnknownCallback38 != IntPtr.Zero)
+            if (native.CopyCallback != IntPtr.Zero)
             {
-                expectedTypeFlags |= Natives.TypeFlags.HasUnknownCallback38;
+                expectedTypeFlags |= Natives.TypeFlags.HasCopy;
             }
             if ((native.Flags & Natives.ClassFlags.ClaimsToBeAStruct) != 0)
             {
@@ -105,11 +104,16 @@ namespace DumpReflection.Reflection
 
             var knownFlags =
                 Natives.ClassFlags.Unknown1 |
-                Natives.ClassFlags.Unknown2 |
+                Natives.ClassFlags.IsUser |
                 Natives.ClassFlags.ClaimsToBeAStruct |
                 Natives.ClassFlags.NotDiffed;
             var unknownFlags = native.Flags & ~knownFlags;
             if (unknownFlags != Natives.ClassFlags.None)
+            {
+                throw new InvalidOperationException();
+            }
+
+            if (native.Unknown8C != 0)
             {
                 throw new InvalidOperationException();
             }
@@ -140,12 +144,11 @@ namespace DumpReflection.Reflection
             this._Downcasts.Clear();
             this._Downcasts.AddRange(downcasts);
 
-            this.UnknownCallback20 = native.UnknownCallback20;
-            this.UnknownCallback28 = native.UnknownCallback28;
-            this.UnknownCallback30 = native.UnknownCallback30;
-            this.UnknownCallback38 = native.UnknownCallback38;
+            this.CtorCallback = native.CtorCallback;
+            this.DtorCallback = native.DtorCallback;
+            this.MoveCallback = native.MoveCallback;
+            this.CopyCallback = native.CopyCallback;
             this.ClassFlags = native.Flags;
-            this.Unknown8C = native.Unknown8C;
         }
 
         private static ClassProperty ReadProperty(RuntimeProcess runtime, IntPtr nativePointer)
@@ -220,35 +223,30 @@ namespace DumpReflection.Reflection
                 writer.WriteValueFlags(this.ClassFlags, Natives.ClassFlags.None);
             }
 
-            if (this.UnknownCallback20 != IntPtr.Zero)
+            // the callbacks are written "out of order" to match their respective flag ordering
+
+            if (this.CtorCallback != IntPtr.Zero)
             {
-                writer.WritePropertyName("__unknown20callback");
-                writer.WriteValue(pointer2Id(this.UnknownCallback20));
+                writer.WritePropertyName("ctor_callback");
+                writer.WriteValue(pointer2Id(this.CtorCallback));
             }
 
-            if (this.UnknownCallback28 != IntPtr.Zero)
+            if (this.CopyCallback != IntPtr.Zero)
             {
-                writer.WritePropertyName("__unknown28callback");
-                writer.WriteValue(pointer2Id(this.UnknownCallback28));
+                writer.WritePropertyName("copy_callback");
+                writer.WriteValue(pointer2Id(this.CopyCallback));
             }
 
-            if (this.UnknownCallback30 != IntPtr.Zero)
+            if (this.MoveCallback != IntPtr.Zero)
             {
-                writer.WritePropertyName("__unknown30callback");
-                writer.WriteValue(pointer2Id(this.UnknownCallback30));
+                writer.WritePropertyName("move_callback");
+                writer.WriteValue(pointer2Id(this.MoveCallback));
             }
 
-            if (this.UnknownCallback38 != IntPtr.Zero)
+            if (this.DtorCallback != IntPtr.Zero)
             {
-                writer.WritePropertyName("__unknown38callback");
-                writer.WriteValue(pointer2Id(this.UnknownCallback38));
-            }
-
-
-            if (this.Unknown8C != 0)
-            {
-                writer.WritePropertyName("__unknown8C");
-                writer.WriteValue(this.Unknown8C);
+                writer.WritePropertyName("dtor_callback");
+                writer.WriteValue(pointer2Id(this.DtorCallback));
             }
 
             if (this.Properties.Count > 0)

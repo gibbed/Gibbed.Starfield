@@ -44,6 +44,15 @@ namespace DumpReflection
 
         public static void Main(string[] args)
         {
+            Environment.ExitCode = MainInternal(args);
+            if (System.Diagnostics.Debugger.IsAttached == false)
+            {
+                Console.ReadLine();
+            }
+        }
+
+        private static int MainInternal(string[] args)
+        {
             bool showHelp = false;
 
             OptionSet options = new()
@@ -61,7 +70,7 @@ namespace DumpReflection
                 Console.Write("{0}: ", GetExecutableName());
                 Console.WriteLine(e.Message);
                 Console.WriteLine("Try `{0} --help' for more information.", GetExecutableName());
-                return;
+                return -1;
             }
 
             if (extras.Count < 0 || extras.Count > 1 || showHelp == true)
@@ -70,18 +79,14 @@ namespace DumpReflection
                 Console.WriteLine();
                 Console.WriteLine("Options:");
                 options.WriteOptionDescriptions(Console.Out);
-                return;
+                return -2;
             }
 
             var outputPath = extras.Count > 0
                 ? extras[0]
                 : "BSReflection.json";
 
-            Environment.ExitCode = DumpingHelpers.Main(outputPath, Dump);
-            if (System.Diagnostics.Debugger.IsAttached == false)
-            {
-                Console.ReadLine();
-            }
+            return -3 + DumpingHelpers.Main(outputPath, Dump);
         }
 
         private static int Dump(RuntimeProcess runtime, AddressLibrary addressLibrary, string outputPath)

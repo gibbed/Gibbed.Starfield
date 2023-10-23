@@ -25,6 +25,7 @@ using System.Runtime.InteropServices;
 
 namespace DumpReflection.Natives
 {
+    // BSReflection::EnumerationType -> BSReflection::ReflectionBase<BSReflection::EnumerationType> -> BSReflection::IType
     [StructLayout(LayoutKind.Sequential)]
     internal class EnumType
     {

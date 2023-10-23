@@ -31,7 +31,7 @@ namespace DumpReflection.Natives
 
         Unknown0 = 1 << 0,
         Unknown1 = 1 << 1,
-        Unknown2 = 1 << 2,
+        IsUser = 1 << 2,
         ClaimsToBeAStruct = 1 << 3,
         NotDiffed = 1 << 4,
         Unknown5 = 1 << 5,
