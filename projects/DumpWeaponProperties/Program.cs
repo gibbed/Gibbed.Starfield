@@ -83,7 +83,8 @@ namespace DumpWeaponProperties
                 ? extras[0]
                 : "Weapon Properties.csv";
 
-            return -3 + DumpingHelpers.Main(outputPath, Dump);
+            var result = DumpingHelpers.Main(outputPath, Dump);
+            return result < 0 ? -3 + result : result;
         }
 
         private static int Dump(RuntimeProcess runtime, AddressLibrary addressLibrary, string outputPath)
