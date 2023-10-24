@@ -17,9 +17,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DumpConditionFunctions", "p
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DumpLoadedPluginList", "projects\DumpLoadedPluginList\DumpLoadedPluginList.csproj", "{5CA73128-E26F-4F86-A3A3-979AC00DC4A1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DumpReflection", "projects\DumpReflection\DumpReflection.csproj", "{2E4A9417-91BC-4775-B445-D328F785710A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DumpModProperties", "projects\DumpModProperties\DumpModProperties.csproj", "{9E6E590A-8BCC-4154-A300-FD4AEC437692}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DumpWeaponProperties", "projects\DumpWeaponProperties\DumpWeaponProperties.csproj", "{9E6E590A-8BCC-4154-A300-FD4AEC437692}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DumpReflection", "projects\DumpReflection\DumpReflection.csproj", "{2E4A9417-91BC-4775-B445-D328F785710A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gibbed.AddressLibrary", "projects\Gibbed.AddressLibrary\Gibbed.AddressLibrary.csproj", "{975AE106-60CF-4497-8C86-53E7BFEF899C}"
 EndProject

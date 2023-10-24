@@ -23,10 +23,10 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace DumpWeaponProperties.Natives
+namespace DumpModProperties.Natives
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct WeaponProperty
+    internal struct ModProperty
     {
         public IntPtr Unknown00; // 00
         public IntPtr CopyCallback; // 08
@@ -36,9 +36,9 @@ namespace DumpWeaponProperties.Natives
         public uint Id; // 28
         public uint Unknown2C; // 2C
 
-        static WeaponProperty()
+        static ModProperty()
         {
-            if (Marshal.SizeOf(typeof(WeaponProperty)) != 0x30)
+            if (Marshal.SizeOf(typeof(ModProperty)) != 0x30)
             {
                 throw new InvalidOperationException();
             }

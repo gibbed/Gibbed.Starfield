@@ -24,13 +24,14 @@ using System;
 using System.Linq;
 using StarfieldDumping;
 
-namespace DumpWeaponProperties
+namespace DumpModProperties
 {
-    internal static class PatternHelpers
+    internal static class LoadPatternHelpers
     {
         public enum LoadType
         {
             UInt8,
+            Int16,
             UInt16,
             UInt32,
             Single,
@@ -39,7 +40,7 @@ namespace DumpWeaponProperties
             FormIdAndInt32,
         };
 
-        internal struct LoadPattern
+        private struct PatternInfo
         {
             public ByteSearch.Pattern Pattern;
             public int StructOffsetOffset;
@@ -50,7 +51,7 @@ namespace DumpWeaponProperties
             public int FieldOffsetSize;
             public LoadType Type;
 
-            public LoadPattern(
+            public PatternInfo(
                 ByteSearch.Pattern pattern,
                 int structOffsetOffset, int structOffsetSize,
                 int struct2OffsetOffset, int struct2OffsetSize,
@@ -67,7 +68,7 @@ namespace DumpWeaponProperties
                 this.Type = type;
             }
 
-            public static implicit operator LoadPattern((
+            public static implicit operator PatternInfo((
                 ByteSearch.Pattern pattern,
                 int structOffsetOffset, int structOffsetSize,
                 int struct2OffsetOffset, int struct2OffsetSize,
@@ -84,7 +85,7 @@ namespace DumpWeaponProperties
                 );
             }
 
-            public static implicit operator LoadPattern((
+            public static implicit operator PatternInfo((
                 ByteSearch.Pattern pattern,
                 int structOffsetOffset, int structOffsetSize,
                 int fieldOffsetOffset, int fieldOffsetSize,
@@ -100,7 +101,7 @@ namespace DumpWeaponProperties
                 );
             }
 
-            public static implicit operator LoadPattern((
+            public static implicit operator PatternInfo((
                 ByteSearch.Pattern pattern,
                 int fieldOffsetOffset, int fieldOffsetSize,
                 LoadType type) value)
@@ -116,29 +117,81 @@ namespace DumpWeaponProperties
             }
         }
 
-        private static readonly ByteSearch.Pattern _WeaponPropertyCountPattern;
-        private static readonly int _MaxLoadSize;
-        private static readonly LoadPattern[] _LoadPatterns;
+        private static readonly int _MaxPatternSize;
+        private static readonly PatternInfo[] _PatternInfos;
 
-        static PatternHelpers()
+        static LoadPatternHelpers()
         {
-            _WeaponPropertyCountPattern = new ByteSearch.Pattern()
+            var loadInt16Pattern = new ByteSearch.Pattern()
             {
-                new byte[] { 0x48, 0x83, 0xEC, 0x28 }, // sub rsp, 0x28
-                new byte[] { 0x0F, 0xB7, 0x42, 0x18 }, // movzx eax, word ptr [rdx+0x18]
-                new byte[] { 0x4D, 0x8B, 0xD0 }, // mov r10, r8
-                new byte[] { 0x25, 0xFF, 0x07, 0x00, 0x00 }, // and eax, 0x7FF
-                new byte[] { 0x3D }, // cmp eax, 150
+                new byte[] { 0x44, 0x0F, 0xBF, 0x81 }, // movsx r8d, word ptr [rcx+fieldOffset]
                 ByteSearch.AnyBytes(4),
-                new byte[] { 0x73, 0x21 }, // jnb short $
+                new byte[] { 0xB0, 0x01 }, // mov al, 1
+                new byte[] { 0x44, 0x89, 0x42, 0x08 }, // mov [rdx+8], r8d
+                new byte[] { 0xC7, 0x02, 0x01, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 1
+                new byte[] { 0xC3 }, // retn
             };
-            var loadUInt16Pattern = new ByteSearch.Pattern()
+            var loadUInt16Pattern1 = new ByteSearch.Pattern()
+            {
+                new byte[] { 0x44, 0x0F, 0xB7, 0x41 }, // movzx r8d, word ptr [rcx+fieldOffset]
+                ByteSearch.AnyBytes(1),
+                new byte[] { 0xB0, 0x01 }, // mov al, 1
+                new byte[] { 0x44, 0x89, 0x42, 0x08 }, // mov [rdx+8], r8d
+                new byte[] { 0xC7, 0x02, 0x01, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 1
+                new byte[] { 0xC3 }, // retn
+            };
+            var loadUInt16Pattern4 = new ByteSearch.Pattern()
             {
                 new byte[] { 0x44, 0x0F, 0xB7, 0x81 }, // movzx r8d, word ptr [rcx+fieldOffset]
                 ByteSearch.AnyBytes(4),
                 new byte[] { 0xB0, 0x01 }, // mov al, 1
                 new byte[] { 0x44, 0x89, 0x42, 0x08 }, // mov [rdx+8], r8d
                 new byte[] { 0xC7, 0x02, 0x01, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 1
+                new byte[] { 0xC3 }, // retn
+            };
+            var loadUInt32Pattern = new ByteSearch.Pattern()
+            {
+                new byte[] { 0x44, 0x8B, 0x41 }, // mov r8d, [rcx+fieldOffset]
+                ByteSearch.AnyBytes(1),
+                new byte[] { 0xB0, 0x01 }, // mov al, 1
+                new byte[] { 0xC7, 0x02, 0x01, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 1
+                new byte[] { 0x44, 0x89, 0x42, 0x08 }, // mov [rdx+8], r8d
+                new byte[] { 0xC3 }, // retn
+            };
+            var loadSinglePattern1 = new ByteSearch.Pattern()
+            {
+                new byte[] { 0xC5, 0xFA, 0x10, 0x41 }, // vmovss xmm0, dword ptr [rcx+fieldOffset]
+                ByteSearch.AnyBytes(1),
+                new byte[] { 0x83, 0x22, 0x00 }, // and dword ptr [rdx], 0
+                new byte[] { 0xB0, 0x01 }, // mov al, 1
+                new byte[] { 0xC5, 0xFA, 0x11, 0x42, 0x08 }, // vmovss dword ptr [rdx+8], xmm0
+                new byte[] { 0xC3 }, // retn
+            };
+            var loadSinglePattern4 = new ByteSearch.Pattern()
+            {
+                new byte[] { 0xC5, 0xFA, 0x10, 0x81 }, // vmovss xmm0, dword ptr [rcx+fieldOffset]
+                ByteSearch.AnyBytes(4),
+                new byte[] { 0x83, 0x22, 0x00 }, // and dword ptr [rdx], 0
+                new byte[] { 0xB0, 0x01 }, // mov al, 1
+                new byte[] { 0xC5, 0xFA, 0x11, 0x42, 0x08 }, // vmovss dword ptr [rdx+8], xmm0
+                new byte[] { 0xC3 }, // retn
+            };
+            var loadFormIdAndInt32Pattern1 = new ByteSearch.Pattern()
+            {
+                new byte[] { 0x48, 0x8B, 0x41 }, // mov rax, [rcx+field]
+                ByteSearch.AnyBytes(1),
+                new byte[] { 0x48, 0x89, 0x42, 0x08 }, // mov [rdx+8], rcx
+                new byte[] { 0xB0, 0x01 }, // mov al, 1
+                new byte[] { 0xC7, 0x02, 0x03, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 3
+                new byte[] { 0xC3 }, // retn
+            };
+            var loadFormIdAndInt32Pattern4 = new ByteSearch.Pattern()
+            {
+                new byte[] { 0x48, 0x8B, 0x81 }, // mov rax, [rcx+field]
+                ByteSearch.AnyBytes(4),
+                new byte[] { 0x48, 0x89, 0x42, 0x08 }, // mov [rdx+8], rcx
+                new byte[] { 0xB0, 0x01 }, // mov al, 1
+                new byte[] { 0xC7, 0x02, 0x03, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 3
                 new byte[] { 0xC3 }, // retn
             };
             var loadStructUInt8Pattern = new ByteSearch.Pattern()
@@ -328,9 +381,16 @@ namespace DumpWeaponProperties
                 new byte[] { 0xC7, 0x02, 0x01, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 1
                 new byte[] { 0xC3 }, // retn
             };
-            _LoadPatterns = new LoadPattern[]
+            _PatternInfos = new PatternInfo[]
             {
-                (loadUInt16Pattern, 4, 4, LoadType.UInt16),
+                (loadInt16Pattern, 4, 4, LoadType.Int16),
+                (loadUInt16Pattern1, 4, 1, LoadType.UInt16),
+                (loadUInt16Pattern4, 4, 4, LoadType.UInt16),
+                (loadUInt32Pattern, 3, 1, LoadType.UInt32),
+                (loadSinglePattern1, 4, 1, LoadType.Single),
+                (loadSinglePattern4, 4, 4, LoadType.Single),
+                (loadFormIdAndInt32Pattern1, 3, 1, LoadType.FormIdAndInt32),
+                (loadFormIdAndInt32Pattern4, 3, 4, LoadType.FormIdAndInt32),
                 (loadStructUInt8Pattern, 3, 1, 7, 1, LoadType.UInt8),
                 (loadStructUInt16Pattern, 3, 1, 7, 1, LoadType.UInt16),
                 (loadStructUInt32Pattern11, 3, 1, 6, 1, LoadType.UInt32),
@@ -347,29 +407,18 @@ namespace DumpWeaponProperties
                 (loadStructStructSingleToInt32Pattern, 3, 1, 7, 1, 14, 1, LoadType.SingleToInt32),
                 (loadStructStructFormIdPattern, 3, 1, 7, 1, 13, 1, LoadType.FormId),
             };
-            _MaxLoadSize = _LoadPatterns.Max(t => t.Pattern.Count);
+            _MaxPatternSize = _PatternInfos.Max(t => t.Pattern.Count);
         }
 
-        public static int GetWeaponPropertyCount(RuntimeProcess runtime, IntPtr functionPointer)
-        {
-            var bytes = runtime.ReadBytes(functionPointer, _WeaponPropertyCountPattern.Count);
-            if (ByteSearch.Match(bytes, _WeaponPropertyCountPattern, out var codeOffset) == false ||
-                codeOffset != 0)
-            {
-                throw new InvalidOperationException();
-            }
-            return BitConverter.ToInt32(bytes, 17);
-        }
-
-        public static bool GetValueLoadOffsets(
+        public static bool Match(
             RuntimeProcess runtime,
             IntPtr functionPointer,
             out (int structOffset, int struct2Offset, int fieldOffset, LoadType type) info)
         {
-            var bytes = runtime.ReadBytes(functionPointer, _MaxLoadSize);
-            foreach (var loadPattern in _LoadPatterns)
+            var bytes = runtime.ReadBytes(functionPointer, _MaxPatternSize);
+            foreach (var patternInfo in _PatternInfos)
             {
-                if (ByteSearch.Match(bytes, loadPattern.Pattern, out var codeOffset) == false || codeOffset != 0)
+                if (ByteSearch.Match(bytes, patternInfo.Pattern, out var codeOffset) == false || codeOffset != 0)
                 {
                     continue;
                 }
@@ -386,10 +435,10 @@ namespace DumpWeaponProperties
                         _ => throw new NotSupportedException(),
                     };
                 }
-                var structOffset = Read(bytes, loadPattern.StructOffsetOffset, loadPattern.StructOffsetSize);
-                var struct2Offset = Read(bytes, loadPattern.Struct2OffsetOffset, loadPattern.Struct2OffsetSize);
-                var fieldOffset = Read(bytes, loadPattern.FieldOffsetOffset, loadPattern.FieldOffsetSize);
-                info = (structOffset, struct2Offset, fieldOffset, loadPattern.Type);
+                var structOffset = Read(bytes, patternInfo.StructOffsetOffset, patternInfo.StructOffsetSize);
+                var struct2Offset = Read(bytes, patternInfo.Struct2OffsetOffset, patternInfo.Struct2OffsetSize);
+                var fieldOffset = Read(bytes, patternInfo.FieldOffsetOffset, patternInfo.FieldOffsetSize);
+                info = (structOffset, struct2Offset, fieldOffset, patternInfo.Type);
                 return true;
             }
             info = default;
