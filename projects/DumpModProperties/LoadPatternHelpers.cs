@@ -282,7 +282,22 @@ namespace DumpModProperties
                 new byte[] { 0xC5, 0xFA, 0x11, 0x42, 0x08 }, // vmovss dword ptr [rdx+8], xmm0
                 new byte[] { 0xC3 }, // retn
             };
-            var loadStructFormIdPattern11 = new ByteSearch.Pattern()
+            var loadStructFormIdPattern11_28 = new ByteSearch.Pattern()
+            {
+                new byte[] { 0x48, 0x8B, 0x41 }, // mov rax, [rcx+structOffset]
+                ByteSearch.AnyBytes(1),
+                new byte[] { 0x48, 0x8B, 0x48 }, // mov ecx, [rax+fieldOffset]
+                ByteSearch.AnyBytes(1),
+                new byte[] { 0x33, 0xC0 }, // xor eax, eax
+                new byte[] { 0x48, 0x85, 0xC9 }, // test rcx, rcx
+                new byte[] { 0x74, 0x03 }, // jz $+3
+                new byte[] { 0x8B, 0x41, 0x28 }, // mov eax, [rcx+0x28]
+                new byte[] { 0x89, 0x42, 0x08 }, // mov [rdx+8], ecx
+                new byte[] { 0xB0, 0x01 }, // mov al, 1
+                new byte[] { 0xC7, 0x02, 0x01, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 1
+                new byte[] { 0xC3 }, // retn
+            };
+            var loadStructFormIdPattern11_30 = new ByteSearch.Pattern()
             {
                 new byte[] { 0x48, 0x8B, 0x41 }, // mov rax, [rcx+structOffset]
                 ByteSearch.AnyBytes(1),
@@ -297,7 +312,22 @@ namespace DumpModProperties
                 new byte[] { 0xC7, 0x02, 0x01, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 1
                 new byte[] { 0xC3 }, // retn
             };
-            var loadStructFormIdPattern41 = new ByteSearch.Pattern()
+            var loadStructFormIdPattern41_28 = new ByteSearch.Pattern()
+            {
+                new byte[] { 0x48, 0x8B, 0x81 }, // mov rax, [rcx+structOffset]
+                ByteSearch.AnyBytes(4),
+                new byte[] { 0x48, 0x8B, 0x48 }, // mov ecx, [rax+fieldOffset]
+                ByteSearch.AnyBytes(1),
+                new byte[] { 0x33, 0xC0 }, // xor eax, eax
+                new byte[] { 0x48, 0x85, 0xC9 }, // test rcx, rcx
+                new byte[] { 0x74, 0x03 }, // jz $+3
+                new byte[] { 0x8B, 0x41, 0x28 }, // mov eax, [rcx+0x28]
+                new byte[] { 0x89, 0x42, 0x08 }, // mov [rdx+8], ecx
+                new byte[] { 0xB0, 0x01 }, // mov al, 1
+                new byte[] { 0xC7, 0x02, 0x01, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 1
+                new byte[] { 0xC3 }, // retn
+            };
+            var loadStructFormIdPattern41_30 = new ByteSearch.Pattern()
             {
                 new byte[] { 0x48, 0x8B, 0x81 }, // mov rax, [rcx+structOffset]
                 ByteSearch.AnyBytes(4),
@@ -364,7 +394,24 @@ namespace DumpModProperties
                 new byte[] { 0xC7, 0x02, 0x01, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 1
                 new byte[] { 0xC3 }, // retn
             };
-            var loadStructStructFormIdPattern = new ByteSearch.Pattern()
+            var loadStructStructFormIdPattern_28 = new ByteSearch.Pattern()
+            {
+                new byte[] { 0x48, 0x8B, 0x41 }, // mov rax, [rcx+structOffset]
+                ByteSearch.AnyBytes(1),
+                new byte[] { 0x48, 0x8B, 0x48 }, // mov rcx, [rax+struct2Offset]
+                ByteSearch.AnyBytes(1),
+                new byte[] { 0x33, 0xC0 }, // xor eax, eax
+                new byte[] { 0x4C, 0x8B, 0x41 }, // mov r8, [rcx+fieldOffset]
+                ByteSearch.AnyBytes(1),
+                new byte[] { 0x4D, 0x85, 0xC0 }, // test r8, r8
+                new byte[] { 0x74, 0x04 }, // jz $+4
+                new byte[] { 0x41, 0x8B, 0x40, 0x28 }, // mov eax, [rcx+0x28]
+                new byte[] { 0x89, 0x42, 0x08 }, // mov [rdx+8], eax
+                new byte[] { 0xB0, 0x01 }, // mov al, 1
+                new byte[] { 0xC7, 0x02, 0x01, 0x00, 0x00, 0x00 }, // mov dword ptr [rdx], 1
+                new byte[] { 0xC3 }, // retn
+            };
+            var loadStructStructFormIdPattern_30 = new ByteSearch.Pattern()
             {
                 new byte[] { 0x48, 0x8B, 0x41 }, // mov rax, [rcx+structOffset]
                 ByteSearch.AnyBytes(1),
@@ -399,13 +446,16 @@ namespace DumpModProperties
                 (loadStructSinglePattern11, 3, 1, 8, 1, LoadType.Single),
                 (loadStructSinglePattern14, 3, 1, 8, 4, LoadType.Single),
                 (loadStructSinglePattern41, 3, 4, 11, 1, LoadType.Single),
-                (loadStructFormIdPattern11, 3, 1, 7, 1, LoadType.FormId),
-                (loadStructFormIdPattern41, 3, 4, 10, 1, LoadType.FormId),
+                (loadStructFormIdPattern11_28, 3, 1, 7, 1, LoadType.FormId),
+                (loadStructFormIdPattern11_30, 3, 1, 7, 1, LoadType.FormId),
+                (loadStructFormIdPattern41_28, 3, 4, 10, 1, LoadType.FormId),
+                (loadStructFormIdPattern41_30, 3, 4, 10, 1, LoadType.FormId),
                 (loadStructStructUInt8Pattern, 3, 1, 7, 1, 14, 1, LoadType.UInt8),
                 (loadStructStructUInt32Pattern, 3, 1, 7, 1, 13, 1, LoadType.UInt32),
                 (loadStructStructSinglePattern, 3, 1, 7, 1, 14, 1, LoadType.Single),
                 (loadStructStructSingleToInt32Pattern, 3, 1, 7, 1, 14, 1, LoadType.SingleToInt32),
-                (loadStructStructFormIdPattern, 3, 1, 7, 1, 13, 1, LoadType.FormId),
+                (loadStructStructFormIdPattern_28, 3, 1, 7, 1, 13, 1, LoadType.FormId),
+                (loadStructStructFormIdPattern_30, 3, 1, 7, 1, 13, 1, LoadType.FormId),
             };
             _MaxPatternSize = _PatternInfos.Max(t => t.Pattern.Count);
         }

@@ -116,6 +116,7 @@ namespace StarfieldDumping
             yield return "1.7.29.0";
             yield return "1.7.33.0";
             yield return "1.7.36.0";
+            yield return "1.8.86.0";
         }
     }
 }
